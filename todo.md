@@ -1,0 +1,14 @@
+# TODO List
+
+## Development Tasks
+
+- [ ] CRUD for every page
+- [ ] Proper types
+- [ ] Sidebar Styling
+- [ ] Create Separate Files for Mock Data
+
+## Notes
+- Focus on implementing CRUD operations across all pages
+- Ensure type safety throughout the application
+- Improve sidebar visual design and user experience
+- Organize mock data into dedicated files for better maintainability
