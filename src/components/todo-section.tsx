@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { IconPlus, IconCalendarFilled, IconFlagFilled, IconGripVertical, IconTagFilled, IconCircleCheck, IconChevronDown, IconBellFilled, IconAlarmFilled } from "@tabler/icons-react"
+import { IconPlus, IconCalendarFilled, IconFlagFilled, IconGripVertical, IconTagFilled, IconCircleCheck, IconChevronDown, IconBellFilled, IconAlarmFilled, IconTrash } from "@tabler/icons-react"
 import { DatePicker } from "@/components/ui/date-picker"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
@@ -175,6 +175,16 @@ export function TodoSection() {
     setEditingTask(null)
   }
 
+  const deleteTodo = (id: number) => {
+    setTodos((prev) => {
+      const newTodos = { ...prev };
+      (Object.keys(newTodos) as Array<keyof typeof newTodos>).forEach((section) => {
+        newTodos[section] = newTodos[section].filter((todo) => todo.id !== id);
+      });
+      return newTodos;
+    });
+  };
+
   const closeModal = () => {
     setIsCreateModalOpen(false)
     setIsEditMode(false)
@@ -200,9 +210,9 @@ export function TodoSection() {
   }
 
   const TodoItem = ({ todo, section }: { todo: any; section: keyof typeof mockTodos }) => (
-    <Card className="bg-card border-none hover:bg-card/80 transition-colors cursor-pointer" onClick={() => openEditModal(todo)}>
+    <Card className="group bg-card border-none hover:bg-card/80 transition-colors cursor-pointer" onClick={() => openEditModal(todo)}>
       <CardContent>
-        <div className="flex gap-3">
+        <div className="flex gap-3 items-center">
           <IconGripVertical className="w-4 h-4 text-muted-foreground cursor-grab" />
           <Checkbox
             checked={todo.completed}
@@ -239,6 +249,17 @@ export function TodoSection() {
               )}
             </div>
           </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-destructive"
+            onClick={(e) => {
+              e.stopPropagation();
+              deleteTodo(todo.id);
+            }}
+          >
+            <IconTrash className="w-5 h-5" />
+          </Button>
         </div>
       </CardContent>
     </Card>
