@@ -36,10 +36,10 @@ const mockBookmarks = [
 
 export function BookmarksSection() {
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 pt-0 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-[40px] font-bold text-foreground mb-1">Bookmarks</h1>
+          <h1 className="text-[26px] font-bold text-foreground mb-1">Bookmarks</h1>
           <p className="text-muted-foreground text-lg">Save and organize your favorite links</p>
         </div>
         <Button className="text-sm !h-10 py-2 px-3" variant="outline">

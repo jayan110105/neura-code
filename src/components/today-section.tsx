@@ -117,9 +117,9 @@ export function TodaySection() {
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 pt-0 max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-[40px] font-bold text-foreground mb-1">Today</h1>
+        <h1 className="text-[26px] font-bold text-foreground mb-1">Today</h1>
         <p className="text-muted-foreground text-lg mb-6">Your captured content organized by type</p>
 
         <Card className="bg-card border-none">

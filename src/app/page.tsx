@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { SidebarProvider } from "@/components/ui/sidebar"
+import { SidebarProvider, SidebarInset, SidebarTrigger, useSidebar } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { NotesSection } from "@/components/notes-section"
 import { BookmarksSection } from "@/components/bookmarks-section"
@@ -9,8 +9,8 @@ import { TodoSection } from "@/components/todo-section"
 import { RemindersSection } from "@/components/reminders-section"
 import { TodaySection } from "@/components/today-section"
 
-export default function NeuraApp() {
-  const [activeSection, setActiveSection] = useState("notes")
+function AppContent({ activeSection, setActiveSection }: { activeSection: string, setActiveSection: (section: string) => void }) {
+  const { open } = useSidebar()
 
   const renderActiveSection = () => {
     switch (activeSection) {
@@ -25,15 +25,28 @@ export default function NeuraApp() {
       case "today":
         return <TodaySection />
       default:
-        return <NotesSection />
+        return <TodaySection />
     }
   }
+
+  return (
+    <SidebarInset>
+      <div className="h-[55px] flex items-center px-4">
+        {!open && <SidebarTrigger/>}
+      </div>
+      <main className="flex-1">{renderActiveSection()}</main>
+    </SidebarInset>
+  )
+}
+
+export default function NeuraApp() {
+  const [activeSection, setActiveSection] = useState("today")
 
   return (
     <div className="min-h-screen">
       <SidebarProvider defaultOpen={true}>
         <AppSidebar activeSection={activeSection} setActiveSection={setActiveSection} />
-        <main className="flex-1">{renderActiveSection()}</main>
+        <AppContent activeSection={activeSection} setActiveSection={setActiveSection} />
       </SidebarProvider>
     </div>
   )

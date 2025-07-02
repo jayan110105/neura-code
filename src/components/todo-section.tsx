@@ -245,10 +245,10 @@ export function TodoSection() {
   )
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 pt-0 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-[40px] font-bold text-foreground mb-1">TODO</h1>
+          <h1 className="text-[26px] font-bold text-foreground mb-1">Todo</h1>
           <p className="text-muted-foreground text-lg">Manage your tasks and priorities</p>
         </div>
         <Button 

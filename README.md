@@ -4,7 +4,7 @@
 
 - [ ] CRUD for every page
 - [ ] Proper types
-- [ ] Sidebar Styling
+- [x] Sidebar Styling
 - [ ] Create Separate Files for Mock Data
 
 ## Notes
