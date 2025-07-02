@@ -72,6 +72,10 @@ export function NotesSection() {
     setEditingNote(null)
   }
 
+  const handleDeleteNote = (id: number) => {
+    setNotes(notes.filter(note => note.id !== id))
+  }
+
   return (
     <div className="p-6 pt-0 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-8">
@@ -87,11 +91,19 @@ export function NotesSection() {
 
       <div className="space-y-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {notes.map((note) => (
-          <Card key={note.id} className="bg-card border-none h-72 cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleEditNote(note)}>
-            <CardHeader className="flex justify-between gap-2">
+          <Card key={note.id} className="bg-card border-none h-72 cursor-pointer hover:shadow-md transition-shadow group" onClick={() => handleEditNote(note)}>
+            <CardHeader className="flex justify-between items-start gap-2">
               <h3 className="text-lg font-medium text-foreground line-clamp-2 flex-1 min-w-0">{note.title}</h3>
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive p-0 shrink-0">
-                <IconTrash className="w-3 h-3" />
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-muted-foreground hover:text-destructive p-0 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleDeleteNote(note.id)
+                }}
+              >
+                <IconTrash className="w-4 h-4" />
               </Button>
             </CardHeader>
             <CardContent>

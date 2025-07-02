@@ -210,7 +210,7 @@ export function TodoSection() {
   }
 
   const TodoItem = ({ todo, section }: { todo: any; section: keyof typeof mockTodos }) => (
-    <Card className="group bg-card border-none hover:bg-card/80 transition-colors cursor-pointer" onClick={() => openEditModal(todo)}>
+    <Card className="!py-3 group bg-card border-none hover:bg-card/80 transition-colors cursor-pointer" onClick={() => openEditModal(todo)}>
       <CardContent>
         <div className="flex gap-3 items-center">
           <IconGripVertical className="w-4 h-4 text-muted-foreground cursor-grab" />

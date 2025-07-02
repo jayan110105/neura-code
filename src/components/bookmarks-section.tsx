@@ -143,7 +143,7 @@ export function BookmarksSection() {
             className="bg-card border-card hover:bg-card/80 transition-colors group cursor-pointer"
             onClick={() => openEditModal(bookmark)}
           >
-            <CardHeader className="px-4 pt-4">
+            <CardHeader className="px-4">
               <div className="flex items-start gap-3">
                 <div className="flex-1 min-w-0">
                   <h3 className="font-medium text-foreground text-sm leading-tight mb-1 line-clamp-2">
@@ -180,9 +180,9 @@ export function BookmarksSection() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="pt-0 px-4 pb-4">
+            <CardContent className="pt-0 px-4">
               <p className="text-muted-foreground text-xs mb-3 line-clamp-2">{bookmark.description}</p>
-              <div className="flex flex-wrap gap-1 mb-2">
+              <div className="flex flex-wrap gap-1">
                 {bookmark.tags.map((tag) => (
                   <Badge
                     key={tag}

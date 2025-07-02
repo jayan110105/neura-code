@@ -2,7 +2,7 @@
 
 ## Development Tasks
 
-- [ ] CRUD for every page
+- [x] CRUD for every page
 - [ ] Proper types
 - [x] Sidebar Styling
 - [ ] Create Separate Files for Mock Data
