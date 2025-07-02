@@ -1,9 +1,8 @@
 "use client"
 
 import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { IconAlarmFilled, IconRepeat } from "@tabler/icons-react"
-import { Reminder } from "@/data/reminders"
+import { IconAlarmFilled, IconRepeat, IconTagFilled } from "@tabler/icons-react"
+import { Reminder } from "@/types"
 
 interface RemindersListProps {
   reminders: Reminder[]
@@ -14,34 +13,29 @@ interface RemindersListProps {
 export function RemindersList({ reminders, onReminderClick }: RemindersListProps) {
   if (reminders.length === 0) return null
 
-  const getRepeatVariant = (repeat?: string) => {
+  const getRepeatColorClass = (repeat: string) => {
     switch (repeat) {
       case "Daily":
-        return "info"
+        return "text-[#2383e2]"
       case "Weekly":
-        return "success"
+        return "text-[#22c55e]"
       case "Monthly":
-        return "accent"
+        return "text-[#a855f7]"
       case "None":
-      case "Once":
-        return "secondary"
-      default:
-        return "secondary"
+        return "text-muted-foreground"
     }
   }
 
-  const getCategoryVariant = (category?: string) => {
+  const getCategoryColorClass = (category: string) => {
     switch (category) {
       case "Work":
-        return "warning"
+        return "text-[#ffb110]"
       case "Health":
-        return "destructive"
+        return "text-[#de5550]"
       case "Personal":
-        return "success"
+        return "text-[#22c55e]" 
       case "Finance":
-        return "info"
-      default:
-        return "secondary"
+        return "text-[#2383e2]"
     }
   }
 
@@ -79,15 +73,16 @@ export function RemindersList({ reminders, onReminderClick }: RemindersListProps
                         </div>
                       )}
                       {reminder.repeat && reminder.repeat !== "None" && (
-                        <Badge variant={getRepeatVariant(reminder.repeat) as any} className="text-xs border">
-                          <IconRepeat className="w-3 h-3 mr-1" />
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <IconRepeat className={`w-3 h-3 ${getRepeatColorClass(reminder.repeat)}`} />
                           {reminder.repeat}
-                        </Badge>
+                        </div>
                       )}
                       {reminder.category && (
-                        <Badge variant={getCategoryVariant(reminder.category) as any} className="text-xs border-0">
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <IconTagFilled className={`w-3 h-3 ${getCategoryColorClass(reminder.category)}`} />
                           {reminder.category}
-                        </Badge>
+                        </div>
                       )}
                     </div>
                   </div>

@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card"
 import { IconFileTextFilled } from "@tabler/icons-react"
-import { Note } from "@/data/notes"
+import { Note } from "@/types"
 
 interface NotesGridProps {
   notes: Note[]

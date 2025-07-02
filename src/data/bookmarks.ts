@@ -1,11 +1,4 @@
-export interface Bookmark {
-  id: number
-  title: string
-  url: string
-  description: string
-  tags: string[]
-  timestamp: string
-}
+import { Bookmark } from "@/types"
 
 export const mockBookmarks: Bookmark[] = [
   {

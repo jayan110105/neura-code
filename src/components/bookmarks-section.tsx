@@ -8,7 +8,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { IconPlus, IconExternalLink, IconTagFilled, IconWorld, IconX, IconTrash } from "@tabler/icons-react"
 import { useState } from "react"
 import TextareaAutosize from "react-textarea-autosize"
-import { Bookmark, mockBookmarks } from "@/data/bookmarks"
+import { mockBookmarks } from "@/data/bookmarks"
+import { Bookmark } from "@/types"
 
 type BookmarkForm = {
   title: string

@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card"
 import { IconBookmarkFilled } from "@tabler/icons-react"
-import { Bookmark } from "@/data/bookmarks"
+import { Bookmark } from "@/types"
 
 interface BookmarksGridProps {
   bookmarks: Bookmark[]

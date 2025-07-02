@@ -1,9 +1,4 @@
-export interface Note {
-  id: number;
-  title: string;
-  content: string;
-  timestamp: string;
-}
+import { Note } from "@/types"
 
 export const mockNotes: Note[] = [
   {

@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { IconPlus, IconTrash } from "@tabler/icons-react"
-import { mockNotes, Note } from "@/data/notes"
+import { mockNotes } from "@/data/notes"
+import { Note } from "@/types"
 
 export function NotesSection() {
   const [notes, setNotes] = useState(mockNotes)

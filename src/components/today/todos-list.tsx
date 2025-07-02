@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { IconFlagFilled, IconTagFilled, IconCalendarFilled } from "@tabler/icons-react"
-import { Todo } from "@/data/todos"
+import { Todo } from "@/types"
 
 interface TodosListProps {
   todos: Todo[]
@@ -22,8 +22,6 @@ export function TodosList({ todos, onTodoClick, onTodoToggle }: TodosListProps) 
         return "text-[#ffb110]"
       case "Low":
         return "text-[#2383e2]"
-      default:
-        return "text-muted-foreground"
     }
   }
 

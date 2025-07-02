@@ -11,7 +11,8 @@ import { DatePicker } from "@/components/ui/date-picker"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { IconPlus, IconCalendarFilled, IconAlarmFilled, IconRepeat, IconTrash, IconTagFilled } from "@tabler/icons-react"
 import TextareaAutosize from "react-textarea-autosize"
-import { mockReminders, Reminder } from "@/data/reminders"
+import { mockReminders } from "@/data/reminders"
+import { Reminder } from "@/types"
 
 type ReminderForm = {
   title: string

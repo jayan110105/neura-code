@@ -10,7 +10,8 @@ import { Input } from "@/components/ui/input"
 import { IconPlus, IconCalendarFilled, IconFlagFilled, IconGripVertical, IconTagFilled, IconCircleCheck, IconChevronDown, IconBellFilled, IconAlarmFilled, IconTrash } from "@tabler/icons-react"
 import { DatePicker } from "@/components/ui/date-picker"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { mockTodos, Todo } from "@/data/todos"
+import { mockTodos } from "@/data/todos"
+import { Todo } from "@/types"
 
 export function TodoSection() {
   const [todos, setTodos] = useState(mockTodos)

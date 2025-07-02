@@ -1,11 +1,4 @@
-export interface Todo {
-  id: number;
-  title: string;
-  completed: boolean;
-  priority: "High" | "Medium" | "Low";
-  dueDate: string;
-  category: string;
-}
+import { Todo } from "@/types"
 
 export const mockTodos: {
   today: Todo[];

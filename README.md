@@ -3,9 +3,9 @@
 ## Development Tasks
 
 - [x] CRUD for every page
-- [ ] Proper types
+- [x] Proper types
 - [x] Sidebar Styling
-- [ ] Create Separate Files for Mock Data
+- [x] Create Separate Files for Mock Data
 
 ## Notes
 - Focus on implementing CRUD operations across all pages
