@@ -10,61 +10,13 @@ import { Input } from "@/components/ui/input"
 import { IconPlus, IconCalendarFilled, IconFlagFilled, IconGripVertical, IconTagFilled, IconCircleCheck, IconChevronDown, IconBellFilled, IconAlarmFilled, IconTrash } from "@tabler/icons-react"
 import { DatePicker } from "@/components/ui/date-picker"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-
-const mockTodos = {
-  today: [
-    {
-      id: 1,
-      title: "Review design mockups for mobile app",
-      completed: false,
-      priority: "High",
-      dueDate: "2024-01-15",
-      category: "Work",
-    },
-    {
-      id: 2,
-      title: "Call dentist to schedule appointment",
-      completed: true,
-      priority: "Medium",
-      dueDate: "2024-01-15",
-      category: "Personal",
-    },
-  ],
-  upcoming: [
-    {
-      id: 3,
-      title: "Prepare presentation for client meeting",
-      completed: false,
-      priority: "High",
-      dueDate: "2024-01-17",
-      category: "Work",
-    },
-    {
-      id: 4,
-      title: "Buy groceries for the week",
-      completed: false,
-      priority: "Low",
-      dueDate: "2024-01-16",
-      category: "Personal",
-    },
-  ],
-  completed: [
-    {
-      id: 5,
-      title: "Update portfolio website",
-      completed: true,
-      priority: "Medium",
-      dueDate: "2024-01-14",
-      category: "Work",
-    },
-  ],
-}
+import { mockTodos, Todo } from "@/data/todos"
 
 export function TodoSection() {
   const [todos, setTodos] = useState(mockTodos)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
-  const [editingTask, setEditingTask] = useState<any>(null)
+  const [editingTask, setEditingTask] = useState<Todo | null>(null)
   const [formData, setFormData] = useState<{
     title: string;
     dueDate?: Date;
@@ -109,7 +61,7 @@ export function TodoSection() {
     setIsCreateModalOpen(true)
   }
 
-  const openEditModal = (task: any) => {
+  const openEditModal = (task: Todo) => {
     setEditingTask(task)
     setIsEditMode(true)
     setFormData({
@@ -137,7 +89,7 @@ export function TodoSection() {
         const newTodos = { ...prev }
         // Find which section the task is in and update it
         for (const [sectionKey, sectionTasks] of Object.entries(newTodos)) {
-          const taskIndex = sectionTasks.findIndex((t: any) => t.id === editingTask.id)
+          const taskIndex = sectionTasks.findIndex((t: Todo) => t.id === editingTask.id)
           if (taskIndex !== -1) {
             newTodos[sectionKey as keyof typeof mockTodos][taskIndex] = updatedTask
             break
@@ -147,7 +99,7 @@ export function TodoSection() {
       })
     } else {
       // Create new task
-      const newTodo = {
+      const newTodo: Todo = {
         id: Date.now(),
         title: formData.title,
         completed: false,
@@ -209,7 +161,7 @@ export function TodoSection() {
     }
   }
 
-  const TodoItem = ({ todo, section }: { todo: any; section: keyof typeof mockTodos }) => (
+  const TodoItem = ({ todo, section }: { todo: Todo; section: keyof typeof mockTodos }) => (
     <Card className="!py-3 group bg-card border-none hover:bg-card/80 transition-colors cursor-pointer" onClick={() => openEditModal(todo)}>
       <CardContent>
         <div className="flex gap-3 items-center">

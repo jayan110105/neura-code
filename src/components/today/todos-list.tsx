@@ -2,18 +2,8 @@
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
-import { IconFlagFilled, IconTagFilled, IconCalendarFilled, IconMessage, IconMicrophoneFilled, IconPhotoFilled, IconLink, IconCircleCheck } from "@tabler/icons-react"
-
-interface Todo {
-  id: number
-  type: "todo"
-  title: string
-  preview: string
-  completed?: boolean
-  priority?: "High" | "Medium" | "Low"
-  category?: string
-  dueDate?: string
-}
+import { IconFlagFilled, IconTagFilled, IconCalendarFilled } from "@tabler/icons-react"
+import { Todo } from "@/data/todos"
 
 interface TodosListProps {
   todos: Todo[]

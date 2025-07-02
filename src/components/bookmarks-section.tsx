@@ -8,45 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { IconPlus, IconExternalLink, IconTagFilled, IconWorld, IconX, IconTrash } from "@tabler/icons-react"
 import { useState } from "react"
 import TextareaAutosize from "react-textarea-autosize"
-
-interface Bookmark {
-  id: number
-  title: string
-  url: string
-  description: string
-  tags: string[]
-  timestamp: string
-}
-
-const initialBookmarks: Bookmark[] = [
-  {
-    id: 1,
-    title: "The Future of AI in Product Design",
-    url: "https://uxdesign.cc/future-ai-design",
-    description:
-      "Exploring how artificial intelligence is reshaping the way we approach user experience and interface design...",
-    tags: ["AI", "Design", "UX"],
-    timestamp: "2024-01-15 16:20",
-  },
-  {
-    id: 2,
-    title: "Building Scalable React Applications",
-    url: "https://react.dev/learn/scaling-up",
-    description:
-      "Best practices for structuring large React applications with proper state management and component architecture...",
-    tags: ["React", "Development", "Architecture"],
-    timestamp: "2024-01-15 12:45",
-  },
-  {
-    id: 3,
-    title: "Notion's Design System Deep Dive",
-    url: "https://notion.so/design-system",
-    description:
-      "An in-depth look at how Notion built their cohesive design system and component library...",
-    tags: ["Design System", "Notion", "UI"],
-    timestamp: "2024-01-14 20:30",
-  },
-]
+import { Bookmark, mockBookmarks } from "@/data/bookmarks"
 
 type BookmarkForm = {
   title: string
@@ -57,7 +19,7 @@ type BookmarkForm = {
 
 
 export function BookmarksSection() {
-  const [bookmarks, setBookmarks] = useState<Bookmark[]>([...initialBookmarks])
+  const [bookmarks, setBookmarks] = useState<Bookmark[]>([...mockBookmarks])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingBookmark, setEditingBookmark] = useState<Bookmark | null>(null)
 

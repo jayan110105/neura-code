@@ -3,14 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { IconAlarmFilled, IconRepeat } from "@tabler/icons-react"
-
-interface Reminder {
-  id: number
-  title: string
-  time?: string
-  repeat?: "Daily" | "Weekly" | "Monthly" | "Once"
-  category?: "Work" | "Health" | "Personal" | "Finance"
-}
+import { Reminder } from "@/data/reminders"
 
 interface RemindersListProps {
   reminders: Reminder[]
@@ -18,7 +11,7 @@ interface RemindersListProps {
   onReminderToggle?: (reminderId: number) => void
 }
 
-export function RemindersList({ reminders, onReminderClick, onReminderToggle }: RemindersListProps) {
+export function RemindersList({ reminders, onReminderClick }: RemindersListProps) {
   if (reminders.length === 0) return null
 
   const getRepeatVariant = (repeat?: string) => {
@@ -29,6 +22,7 @@ export function RemindersList({ reminders, onReminderClick, onReminderToggle }: 
         return "success"
       case "Monthly":
         return "accent"
+      case "None":
       case "Once":
         return "secondary"
       default:
@@ -84,7 +78,7 @@ export function RemindersList({ reminders, onReminderClick, onReminderToggle }: 
                           <span>{reminder.time}</span>
                         </div>
                       )}
-                      {reminder.repeat && (
+                      {reminder.repeat && reminder.repeat !== "None" && (
                         <Badge variant={getRepeatVariant(reminder.repeat) as any} className="text-xs border">
                           <IconRepeat className="w-3 h-3 mr-1" />
                           {reminder.repeat}

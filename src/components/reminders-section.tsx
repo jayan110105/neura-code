@@ -11,60 +11,7 @@ import { DatePicker } from "@/components/ui/date-picker"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { IconPlus, IconCalendarFilled, IconAlarmFilled, IconRepeat, IconTrash, IconTagFilled } from "@tabler/icons-react"
 import TextareaAutosize from "react-textarea-autosize"
-
-interface Reminder {
-  id: number
-  title: string
-  description: string
-  time: string
-  date: string
-  repeat: "Daily" | "Weekly" | "Monthly" | "None"
-  enabled: boolean
-  category: "Work" | "Health" | "Personal" | "Finance"
-}
-
-const initialReminders: Reminder[] = [
-  {
-    id: 1,
-    title: "Team standup meeting",
-    description: "Daily standup with the development team",
-    time: "9:00 AM",
-    date: "2024-01-16",
-    repeat: "Daily",
-    enabled: true,
-    category: "Work",
-  },
-  {
-    id: 2,
-    title: "Take medication",
-    description: "Remember to take vitamin D supplement",
-    time: "8:00 PM",
-    date: "2024-01-15",
-    repeat: "Daily",
-    enabled: true,
-    category: "Health",
-  },
-  {
-    id: 3,
-    title: "Call mom",
-    description: "Weekly check-in call with family",
-    time: "3:00 PM",
-    date: "2024-01-17",
-    repeat: "Weekly",
-    enabled: false,
-    category: "Personal",
-  },
-  {
-    id: 4,
-    title: "Review monthly expenses",
-    description: "Go through credit card statements and budget",
-    time: "10:00 AM",
-    date: "2024-01-31",
-    repeat: "Monthly",
-    enabled: true,
-    category: "Finance",
-  },
-]
+import { mockReminders, Reminder } from "@/data/reminders"
 
 type ReminderForm = {
   title: string
@@ -76,7 +23,7 @@ type ReminderForm = {
 }
 
 export function RemindersSection() {
-  const [reminders, setReminders] = useState<Reminder[]>([...initialReminders])
+  const [reminders, setReminders] = useState<Reminder[]>([...mockReminders])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingReminder, setEditingReminder] = useState<Reminder | null>(null)
 
