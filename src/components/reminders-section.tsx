@@ -281,10 +281,10 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
                 <CardHeader className="px-4">
                   <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="text-foreground mb-2 text-sm font-medium">
+                      <h3 className="text-foreground mb-2 text-lg font-medium">
                         {reminder.title}
                       </h3>
-                      <p className="text-muted-foreground mb-2 text-xs">
+                      <p className="text-muted-foreground mb-2 text-sm">
                         {reminder.description}
                       </p>
                     </div>

@@ -191,10 +191,10 @@ export function BookmarksSection({ bookmarks }: { bookmarks: Bookmark[] }) {
               <CardHeader className="px-4">
                 <div className="flex items-start gap-3">
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-foreground mb-2 line-clamp-2 text-sm leading-tight font-medium">
+                    <h3 className="text-foreground mb-2 line-clamp-2 text-lg leading-tight font-medium">
                       {bookmark.title}
                     </h3>
-                    <div className="text-muted-foreground flex items-center gap-2 text-xs">
+                    <div className="text-muted-foreground flex items-center gap-2 text-sm">
                       <IconWorld className="h-3 w-3" />
                       <span className="truncate">
                         {new URL(bookmark.url).hostname}
@@ -228,7 +228,7 @@ export function BookmarksSection({ bookmarks }: { bookmarks: Bookmark[] }) {
                 </div>
               </CardHeader>
               <CardContent className="px-4 pt-0">
-                <p className="text-muted-foreground mb-3 line-clamp-2 text-xs">
+                <p className="text-muted-foreground mb-3 line-clamp-2 text-sm">
                   {bookmark.description}
                 </p>
                 <div className="flex flex-wrap gap-1">

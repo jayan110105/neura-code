@@ -37,7 +37,7 @@ export function BookmarksGrid({
             <CardContent className="p-3">
               <div className="flex flex-col gap-4">
                 <IconBookmarkFilled className="h-6 w-6" />
-                <h3 className="text-foreground line-clamp-2 min-w-0 text-xs font-medium leading-tight">
+                <h3 className="text-foreground line-clamp-2 min-w-0 text-sm font-medium leading-tight">
                   {bookmark.title}
                 </h3>
               </div>

@@ -34,7 +34,7 @@ export function NotesGrid({ notes, onNoteClick }: NotesGridProps) {
             <CardContent className="p-3">
               <div className="flex flex-col gap-4">
                 <IconFileTextFilled className="h-6 w-6" />
-                <h3 className="text-foreground line-clamp-2 min-w-0 text-xs leading-tight font-medium">
+                <h3 className="text-foreground line-clamp-2 min-w-0 text-sm leading-tight font-medium">
                   {note.title}
                 </h3>
               </div>

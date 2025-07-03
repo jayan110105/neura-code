@@ -38,10 +38,6 @@ export function TodaySection({
     router.push(`/todos?id=${todo.id}`)
   }
 
-  const handleTodoToggle = (todoId: number) => {
-    console.log('Todo toggled:', todoId)
-  }
-
   const handleReminderClick = (reminder: Reminder) => {
     router.push(`/reminders?id=${reminder.id}`)
   }
@@ -56,7 +52,7 @@ export function TodaySection({
 
         <Card className="bg-card border-none">
           <CardContent className="px-6">
-            <h3 className="text-foreground mb-2 font-medium">Daily Log</h3>
+            <h3 className="text-foreground mb-2 font-medium text-xl">Daily Log</h3>
             <p className="text-muted-foreground text-sm leading-relaxed">
               {aiSummary}
             </p>

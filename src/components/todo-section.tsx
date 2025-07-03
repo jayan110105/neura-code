@@ -338,7 +338,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
 
       <div className="space-y-8">
         <div>
-          <h2 className="text-foreground mb-4 flex flex-col gap-2 font-medium">
+          <h2 className="text-foreground mb-4 flex flex-col gap-2 font-medium text-lg">
             Today
             <div className="text-muted-foreground flex items-center gap-1 text-sm">
               <IconCircleCheck className="h-3 w-3" />
@@ -352,7 +352,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
           </div>
         </div>
         <div>
-          <h2 className="text-foreground mb-4 flex flex-col gap-2 font-medium">
+          <h2 className="text-foreground mb-4 flex flex-col gap-2 font-medium text-lg">
             Upcoming
             <div className="text-muted-foreground flex items-center gap-1 text-sm">
               <IconCircleCheck className="h-3 w-3" />
