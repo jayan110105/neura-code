@@ -1,0 +1,5 @@
+# Ignore workspaces
+.next
+.turbo
+dist
+node_modules 

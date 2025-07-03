@@ -1,28 +1,53 @@
 "use client"
 
 import { useState } from "react"
-import { format } from "date-fns"
+import {
+  createTodo,
+  deleteTodo,
+  toggleTodo,
+  updateTodo,
+} from "@/lib/actions/todos"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { IconPlus, IconCalendarFilled, IconFlagFilled, IconGripVertical, IconTagFilled, IconCircleCheck, IconChevronDown, IconBellFilled, IconAlarmFilled, IconTrash } from "@tabler/icons-react"
+import {
+  IconPlus,
+  IconCalendarFilled,
+  IconFlagFilled,
+  IconGripVertical,
+  IconTagFilled,
+  IconCircleCheck,
+  IconChevronDown,
+  IconBellFilled,
+  IconAlarmFilled,
+  IconTrash,
+} from "@tabler/icons-react"
 import { DatePicker } from "@/components/ui/date-picker"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { mockTodos } from "@/data/todos"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Todo } from "@/types"
 
-export function TodoSection() {
-  const [todos, setTodos] = useState(mockTodos)
+export function TodoSection({ todos }: { todos: Todo[] }) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
   const [editingTask, setEditingTask] = useState<Todo | null>(null)
   const [formData, setFormData] = useState<{
-    title: string;
-    dueDate?: Date;
-    priority: "High" | "Medium" | "Low";
-    reminder: string;
+    title: string
+    dueDate?: Date
+    priority: "High" | "Medium" | "Low"
+    reminder: string
   }>({
     title: "",
     priority: "Medium",
@@ -34,8 +59,10 @@ export function TodoSection() {
     for (let hour = 0; hour < 24; hour++) {
       for (let minute = 0; minute < 60; minute += 15) {
         const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
-        const ampm = hour < 12 ? 'AM' : 'PM'
-        const timeString = `${hour12}:${minute.toString().padStart(2, '0')} ${ampm}`
+        const ampm = hour < 12 ? "AM" : "PM"
+        const timeString = `${hour12}:${minute
+          .toString()
+          .padStart(2, "0")} ${ampm}`
         options.push(timeString)
       }
     }
@@ -43,13 +70,6 @@ export function TodoSection() {
   }
 
   const reminderOptions = generateReminderOptions()
-
-  const toggleTodo = (id: number, section: keyof typeof mockTodos) => {
-    setTodos((prev) => ({
-      ...prev,
-      [section]: prev[section].map((todo) => (todo.id === id ? { ...todo, completed: !todo.completed } : todo)),
-    }))
-  }
 
   const openCreateModal = () => {
     setIsEditMode(false)
@@ -68,53 +88,27 @@ export function TodoSection() {
     setFormData({
       title: task.title,
       dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
-      priority: task.priority,
+      priority: task.priority || "Medium",
       reminder: "",
     })
     setIsCreateModalOpen(true)
   }
 
-  const createTodo = () => {
+  const handleFormSubmit = async () => {
     if (!formData.title.trim()) return
 
     if (isEditMode && editingTask) {
-      // Update existing task
-      const updatedTask = {
-        ...editingTask,
+      await updateTodo(editingTask.id, {
         title: formData.title,
         priority: formData.priority,
-        dueDate: formData.dueDate ? format(formData.dueDate, "yyyy-MM-dd") : editingTask.dueDate,
-      }
-
-      setTodos(prev => {
-        const newTodos = { ...prev }
-        // Find which section the task is in and update it
-        for (const [sectionKey, sectionTasks] of Object.entries(newTodos)) {
-          const taskIndex = sectionTasks.findIndex((t: Todo) => t.id === editingTask.id)
-          if (taskIndex !== -1) {
-            newTodos[sectionKey as keyof typeof mockTodos][taskIndex] = updatedTask
-            break
-          }
-        }
-        return newTodos
+        dueDate: formData.dueDate,
       })
     } else {
-      // Create new task
-      const newTodo: Todo = {
-        id: Date.now(),
+      await createTodo({
         title: formData.title,
-        completed: false,
         priority: formData.priority,
-        dueDate: formData.dueDate ? format(formData.dueDate, "yyyy-MM-dd") : new Date(Date.now() + 86400000).toISOString().split('T')[0],
-        category: "Personal"
-      }
-
-      const targetSection = formData.dueDate && new Date(formData.dueDate).toDateString() === new Date().toDateString() ? "today" : "upcoming"
-      
-      setTodos(prev => ({
-        ...prev,
-        [targetSection]: [...prev[targetSection], newTodo]
-      }))
+        dueDate: formData.dueDate,
+      })
     }
 
     // Reset form
@@ -128,16 +122,6 @@ export function TodoSection() {
     setEditingTask(null)
   }
 
-  const deleteTodo = (id: number) => {
-    setTodos((prev) => {
-      const newTodos = { ...prev };
-      (Object.keys(newTodos) as Array<keyof typeof newTodos>).forEach((section) => {
-        newTodos[section] = newTodos[section].filter((todo) => todo.id !== id);
-      });
-      return newTodos;
-    });
-  };
-
   const closeModal = () => {
     setIsCreateModalOpen(false)
     setIsEditMode(false)
@@ -149,7 +133,7 @@ export function TodoSection() {
     })
   }
 
-  const getPriorityIconColor = (priority: string) => {
+  const getPriorityIconColor = (priority: string | null) => {
     switch (priority) {
       case "High":
         return "text-[#de5550]"
@@ -162,28 +146,50 @@ export function TodoSection() {
     }
   }
 
-  const TodoItem = ({ todo, section }: { todo: Todo; section: keyof typeof mockTodos }) => (
-    <Card className="!py-3 group bg-card border-none hover:bg-card/80 transition-colors cursor-pointer" onClick={() => openEditModal(todo)}>
+  const todayTodos = todos.filter(
+    (todo) =>
+      todo.dueDate &&
+      new Date(todo.dueDate).toDateString() === new Date().toDateString(),
+  )
+  const upcomingTodos = todos.filter(
+    (todo) =>
+      !todo.dueDate ||
+      new Date(todo.dueDate).toDateString() !== new Date().toDateString(),
+  )
+
+  const TodoItem = ({ todo }: { todo: Todo }) => (
+    <Card
+      className="!py-3 group bg-card border-none hover:bg-card/80 transition-colors cursor-pointer"
+      onClick={() => openEditModal(todo)}
+    >
       <CardContent>
         <div className="flex gap-3 items-center">
           <IconGripVertical className="w-4 h-4 text-muted-foreground cursor-grab" />
           <Checkbox
             checked={todo.completed}
-            onCheckedChange={() => toggleTodo(todo.id, section)}
+            onCheckedChange={async (checked) => {
+              await toggleTodo(todo.id, todo.completed)
+            }}
             onClick={(e) => e.stopPropagation()}
             className="rounded-full w-5 h-5 border-muted-foreground data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground cursor-pointer"
           />
           <div className="flex-1">
             <h3
               className={`font-medium text-sm ${
-                todo.completed ? "line-through text-muted-foreground" : "text-foreground"
+                todo.completed
+                  ? "line-through text-muted-foreground"
+                  : "text-foreground"
               }`}
             >
               {todo.title}
             </h3>
             <div className="flex items-center gap-2 mt-2">
               <div className="flex items-center gap-1 text-muted-foreground text-xs">
-                <IconFlagFilled className={`w-3 h-3 mr-1 ${getPriorityIconColor(todo.priority)}`} />
+                <IconFlagFilled
+                  className={`w-3 h-3 mr-1 ${getPriorityIconColor(
+                    todo.priority,
+                  )}`}
+                />
                 {todo.priority}
               </div>
               <div className="flex items-center gap-1 border-border text-muted-foreground text-xs">
@@ -207,8 +213,8 @@ export function TodoSection() {
             size="icon"
             className="text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-destructive"
             onClick={(e) => {
-              e.stopPropagation();
-              deleteTodo(todo.id);
+              e.stopPropagation()
+              deleteTodo(todo.id)
             }}
           >
             <IconTrash className="w-5 h-5" />
@@ -223,10 +229,12 @@ export function TodoSection() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-[26px] font-bold text-foreground mb-1">Todo</h1>
-          <p className="text-muted-foreground text-lg">Manage your tasks and priorities</p>
+          <p className="text-muted-foreground text-lg">
+            Manage your tasks and priorities
+          </p>
         </div>
-        <Button 
-          className="text-sm !h-10 py-2 px-3" 
+        <Button
+          className="text-sm !h-10 py-2 px-3"
           variant="outline"
           onClick={openCreateModal}
         >
@@ -241,42 +249,26 @@ export function TodoSection() {
             Today
             <div className="flex items-center gap-1 text-sm text-muted-foreground">
               <IconCircleCheck className="w-3 h-3" />
-              {todos.today.length} tasks
+              {todayTodos.length} tasks
             </div>
           </h2>
           <div className="space-y-2">
-            {todos.today.map((todo) => (
-              <TodoItem key={todo.id} todo={todo} section="today" />
+            {todayTodos.map((todo) => (
+              <TodoItem key={todo.id} todo={todo} />
             ))}
           </div>
         </div>
-
         <div>
           <h2 className="font-medium text-foreground mb-4 flex flex-col gap-2">
             Upcoming
             <div className="flex items-center gap-1 text-sm text-muted-foreground">
               <IconCircleCheck className="w-3 h-3" />
-              {todos.upcoming.length} tasks
+              {upcomingTodos.length} tasks
             </div>
           </h2>
           <div className="space-y-2">
-            {todos.upcoming.map((todo) => (
-              <TodoItem key={todo.id} todo={todo} section="upcoming" />
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <h2 className="font-medium text-foreground mb-4 flex flex-col gap-2">
-            Completed
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-              <IconCircleCheck className="w-3 h-3" />
-              {todos.completed.length} tasks
-            </div>
-          </h2>
-          <div className="space-y-2">
-            {todos.completed.map((todo) => (
-              <TodoItem key={todo.id} todo={todo} section="completed" />
+            {upcomingTodos.map((todo) => (
+              <TodoItem key={todo.id} todo={todo} />
             ))}
           </div>
         </div>
@@ -303,14 +295,20 @@ export function TodoSection() {
 
               <DatePicker
                 selectedDate={formData.dueDate}
-                onDateChange={(date: Date | undefined) => setFormData(prev => ({ ...prev, dueDate: date }))}
+                onDateChange={(date) =>
+                  setFormData({ ...formData, dueDate: date })
+                }
                 placeholder="Pick a date"
                 showLabel={false}
               />
-              
-              <Select 
-                value={formData.priority} 
-                onValueChange={(value: "High" | "Medium" | "Low") => setFormData(prev => ({...prev, priority: value}))}
+              <Select
+                value={formData.priority}
+                onValueChange={(value) =>
+                  setFormData({
+                    ...formData,
+                    priority: value as "High" | "Medium" | "Low",
+                  })
+                }
               >
                 <SelectTrigger 
                   size="sm"
@@ -368,7 +366,7 @@ export function TodoSection() {
             </Button>
             
             <Button
-              onClick={createTodo}
+              onClick={handleFormSubmit}
               disabled={!formData.title.trim()}
               variant="outline"
             >

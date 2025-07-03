@@ -1,54 +1,77 @@
-"use client";
+'use client'
 
-import { useState } from "react";
+import { useState } from 'react'
 import {
   SidebarProvider,
   SidebarInset,
   SidebarTrigger,
   useSidebar,
-} from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
-import { NotesSection } from "@/components/notes-section";
-import { BookmarksSection } from "@/components/bookmarks-section";
-import { TodoSection } from "@/components/todo-section";
-import { RemindersSection } from "@/components/reminders-section";
-import { TodaySection } from "@/components/today-section";
+} from '@/components/ui/sidebar'
+import { AppSidebar } from '@/components/app-sidebar'
+import { NotesSection } from '@/components/notes-section'
+import { BookmarksSection } from '@/components/bookmarks-section'
+import { TodoSection } from '@/components/todo-section'
+import { RemindersSection } from '@/components/reminders-section'
+import { TodaySection } from '@/components/today-section'
+import { Todo, Reminder, Note, Bookmark } from '@/types'
 
-export function AppContent() {
-  const [activeSection, setActiveSection] = useState("today");
+type AppContentProps = {
+  todos: Todo[]
+  reminders: Reminder[]
+  notes: Note[]
+  bookmarks: Bookmark[]
+}
 
-  function PageContent({
-    activeSection,
-  }: {
-    activeSection: string;
-  }) {
-    const { open } = useSidebar();
+export function AppContent({
+  todos,
+  reminders,
+  notes,
+  bookmarks,
+}: AppContentProps) {
+  const [activeSection, setActiveSection] = useState('today')
+
+  function PageContent({ activeSection }: { activeSection: string }) {
+    const { open } = useSidebar()
 
     const renderActiveSection = () => {
       switch (activeSection) {
-        case "notes":
-          return <NotesSection />;
-        case "bookmarks":
-          return <BookmarksSection />;
-        case "todo":
-          return <TodoSection />;
-        case "reminders":
-          return <RemindersSection />;
-        case "today":
-          return <TodaySection />;
+        case 'notes':
+          return <NotesSection notes={notes} />
+        case 'bookmarks':
+          return <BookmarksSection bookmarks={bookmarks} />
+        case 'todo':
+          return <TodoSection todos={todos} />
+        case 'reminders':
+          return <RemindersSection reminders={reminders} />
+        case 'today':
+          return (
+            <TodaySection
+              todos={todos}
+              reminders={reminders}
+              notes={notes}
+              bookmarks={bookmarks}
+            />
+          )
         default:
-          return <TodaySection />;
+          return (
+            <TodaySection
+              todos={todos}
+              reminders={reminders}
+              notes={notes}
+              bookmarks={bookmarks}
+            />
+          )
       }
-    };
+    }
 
     return (
       <SidebarInset>
-        <div className="h-[55px] flex items-center px-4">
+        <div className="flex h-[55px] items-center px-4">
           {!open && <SidebarTrigger />}
         </div>
         <main className="flex-1">{renderActiveSection()}</main>
       </SidebarInset>
-    );
+    )
   }
 
   return (
@@ -61,5 +84,5 @@ export function AppContent() {
         <PageContent activeSection={activeSection} />
       </SidebarProvider>
     </div>
-  );
-} 
+  )
+}

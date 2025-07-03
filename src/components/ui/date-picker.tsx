@@ -1,18 +1,18 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import { format } from "date-fns"
+import * as React from 'react'
+import { format } from 'date-fns'
 
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
-import { Label } from "@/components/ui/label"
+import { Button } from '@/components/ui/button'
+import { Calendar } from '@/components/ui/calendar'
+import { Label } from '@/components/ui/label'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
-import { IconCalendarFilled } from "@tabler/icons-react"
-import { cn } from "@/lib/utils"
+} from '@/components/ui/popover'
+import { IconCalendarFilled } from '@tabler/icons-react'
+import { cn } from '@/lib/utils'
 
 interface DatePickerProps {
   selectedDate?: Date
@@ -23,13 +23,13 @@ interface DatePickerProps {
   label?: string
 }
 
-export function DatePicker({ 
-  selectedDate, 
-  onDateChange, 
-  placeholder = "Pick a date",
+export function DatePicker({
+  selectedDate,
+  onDateChange,
+  placeholder = 'Pick a date',
   className,
   showLabel = false,
-  label = "Date of birth"
+  label = 'Date of birth',
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false)
 
@@ -46,13 +46,17 @@ export function DatePicker({
             variant="outline"
             id="date"
             className={cn(
-              "justify-start text-left font-normal text-xs h-7 border-text-muted-foreground text-muted-foreground rounded-sm",
-              !selectedDate && "text-muted-foreground",
-              className
+              'border-text-muted-foreground text-muted-foreground h-7 justify-start rounded-sm text-left text-xs font-normal',
+              !selectedDate && 'text-muted-foreground',
+              className,
             )}
           >
             <IconCalendarFilled className="h-3 w-3" />
-            {selectedDate ? format(selectedDate, "d MMM") : <span>{placeholder}</span>}
+            {selectedDate ? (
+              format(selectedDate, 'd MMM')
+            ) : (
+              <span>{placeholder}</span>
+            )}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto overflow-hidden p-0" align="start">

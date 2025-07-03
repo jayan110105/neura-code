@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import {
   Sidebar,
@@ -9,59 +9,59 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
   SidebarFooter,
-} from "@/components/ui/sidebar"
-import { 
-  IconFileText, 
+} from '@/components/ui/sidebar'
+import {
+  IconFileText,
   IconFileTextFilled,
-  IconBookmark, 
+  IconBookmark,
   IconBookmarkFilled,
-  IconCalendar, 
+  IconCalendar,
   IconCalendarFilled,
-  IconBrain, 
+  IconBrain,
   IconSearch,
   IconAlarm,
   IconAlarmFilled,
   IconCopyCheck,
   IconCopyCheckFilled,
   IconLogout,
-} from "@tabler/icons-react"
-import { authClient } from "@/lib/auth-client"
-import { useRouter } from "next/navigation"
+} from '@tabler/icons-react'
+import { authClient } from '@/lib/auth-client'
+import { useRouter } from 'next/navigation'
 
 const menuItems = [
   {
-    id: "search",
-    title: "Search",
+    id: 'search',
+    title: 'Search',
     icon: IconSearch,
     iconFilled: IconSearch,
   },
   {
-    id: "today",
-    title: "Today",
+    id: 'today',
+    title: 'Today',
     icon: IconCalendar,
     iconFilled: IconCalendarFilled,
   },
   {
-    id: "notes",
-    title: "Notes",
+    id: 'notes',
+    title: 'Notes',
     icon: IconFileText,
     iconFilled: IconFileTextFilled,
   },
   {
-    id: "bookmarks",
-    title: "Bookmarks",
+    id: 'bookmarks',
+    title: 'Bookmarks',
     icon: IconBookmark,
     iconFilled: IconBookmarkFilled,
   },
   {
-    id: "todo",
-    title: "Todo",
+    id: 'todo',
+    title: 'Todo',
     icon: IconCopyCheck,
     iconFilled: IconCopyCheckFilled,
   },
   {
-    id: "reminders",
-    title: "Reminders",
+    id: 'reminders',
+    title: 'Reminders',
     icon: IconAlarm,
     iconFilled: IconAlarmFilled,
   },
@@ -72,44 +72,50 @@ interface AppSidebarProps {
   setActiveSection: (section: string) => void
 }
 
-export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps) {
+export function AppSidebar({
+  activeSection,
+  setActiveSection,
+}: AppSidebarProps) {
   const router = useRouter()
 
   const handleSignOut = async () => {
     await authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
-          router.push("/sign-in")
+          router.push('/sign-in')
         },
       },
     })
   }
 
   return (
-    <Sidebar className="border-r border-none bg-sidebar">
+    <Sidebar className="bg-sidebar border-r border-none">
       <SidebarHeader className="p-3 px-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <IconBrain className="w-6 h-6 text-primary" />
-            <h1 className="text-lg font-medium text-sidebar-foreground">Neura</h1>
+            <IconBrain className="text-primary h-6 w-6" />
+            <h1 className="text-sidebar-foreground text-lg font-medium">
+              Neura
+            </h1>
           </div>
           <SidebarTrigger className="ml-auto" />
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="py-1 px-3">
+      <SidebarContent className="px-3 py-1">
         <SidebarMenu>
           {menuItems.map((item) => {
-            const IconComponent = activeSection === item.id ? item.iconFilled : item.icon;
+            const IconComponent =
+              activeSection === item.id ? item.iconFilled : item.icon
             return (
               <SidebarMenuItem key={item.id}>
                 <SidebarMenuButton
                   onClick={() => setActiveSection(item.id)}
                   isActive={activeSection === item.id}
-                  className={`w-full rounded-sm justify-start gap-3 px-3 !h-9 transition-all duration-150 text-sm font-medium ${
+                  className={`!h-9 w-full justify-start gap-3 rounded-sm px-3 text-sm font-medium transition-all duration-150 ${
                     activeSection === item.id
-                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                      : "text-muted-foreground hover:bg-sidebar-accent"
+                      ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                      : 'text-muted-foreground hover:bg-sidebar-accent'
                   }`}
                 >
                   <IconComponent className="!size-6" />
@@ -125,7 +131,7 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={handleSignOut}
-              className="w-full rounded-sm justify-start gap-3 px-3 !h-9 transition-all duration-150 text-sm font-medium text-muted-foreground hover:bg-sidebar-accent"
+              className="text-muted-foreground hover:bg-sidebar-accent !h-9 w-full justify-start gap-3 rounded-sm px-3 text-sm font-medium transition-all duration-150"
             >
               <IconLogout className="!size-6" />
               <span>Sign Out</span>

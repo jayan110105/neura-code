@@ -1,15 +1,32 @@
-"use client"
+'use client'
 
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { IconPlus, IconExternalLink, IconTagFilled, IconWorld, IconX, IconTrash } from "@tabler/icons-react"
-import { useState } from "react"
-import TextareaAutosize from "react-textarea-autosize"
-import { mockBookmarks } from "@/data/bookmarks"
-import { Bookmark } from "@/types"
+import {
+  createBookmark,
+  deleteBookmark,
+  updateBookmark,
+} from '@/lib/actions/bookmarks'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
+  IconPlus,
+  IconExternalLink,
+  IconTagFilled,
+  IconWorld,
+  IconX,
+  IconTrash,
+} from '@tabler/icons-react'
+import { useState } from 'react'
+import TextareaAutosize from 'react-textarea-autosize'
+import { toast } from 'sonner'
+import { Bookmark } from '@/types'
 
 type BookmarkForm = {
   title: string
@@ -18,22 +35,20 @@ type BookmarkForm = {
   tags: string[]
 }
 
-
-export function BookmarksSection() {
-  const [bookmarks, setBookmarks] = useState<Bookmark[]>([...mockBookmarks])
+export function BookmarksSection({ bookmarks }: { bookmarks: Bookmark[] }) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingBookmark, setEditingBookmark] = useState<Bookmark | null>(null)
 
   const [formData, setFormData] = useState<BookmarkForm>({
-    title: "",
-    url: "",
-    description: "",
+    title: '',
+    url: '',
+    description: '',
     tags: [],
   })
 
   const openCreateModal = () => {
     setEditingBookmark(null)
-    setFormData({ title: "", url: "", description: "", tags: [] })
+    setFormData({ title: '', url: '', description: '', tags: [] })
     setIsModalOpen(true)
   }
 
@@ -42,8 +57,8 @@ export function BookmarksSection() {
     setFormData({
       title: bookmark.title,
       url: bookmark.url,
-      description: bookmark.description,
-      tags: bookmark.tags,
+      description: bookmark.description || '',
+      tags: bookmark.tags || [],
     })
     setIsModalOpen(true)
   }
@@ -53,32 +68,35 @@ export function BookmarksSection() {
     setEditingBookmark(null)
   }
 
-  const deleteBookmark = (id: number) => {
-    setBookmarks(prev => prev.filter(b => b.id !== id))
+  const handleDeleteBookmark = async (id: number) => {
+    await deleteBookmark(id)
     closeModal()
   }
 
-  const saveBookmark = () => {
+  const handleSaveBookmark = async () => {
     if (!formData.title.trim() || !formData.url.trim()) return
 
+    try {
+      new URL(formData.url)
+    } catch {
+      toast.error('Please enter a valid URL')
+      return
+    }
+
     if (editingBookmark) {
-      setBookmarks((prev) =>
-        prev.map((b) =>
-          b.id === editingBookmark.id
-            ? { ...b, title: formData.title, url: formData.url, description: formData.description, tags: formData.tags }
-            : b
-        )
-      )
-    } else {
-      const newBookmark: Bookmark = {
-        id: Date.now(),
+      await updateBookmark(editingBookmark.id, {
         title: formData.title,
         url: formData.url,
         description: formData.description,
         tags: formData.tags,
-        timestamp: new Date().toISOString(),
-      }
-      setBookmarks((prev) => [...prev, newBookmark])
+      })
+    } else {
+      await createBookmark({
+        title: formData.title,
+        url: formData.url,
+        description: formData.description,
+        tags: formData.tags,
+      })
     }
 
     closeModal()
@@ -87,14 +105,22 @@ export function BookmarksSection() {
   const isEditMode = Boolean(editingBookmark)
 
   return (
-    <div className="p-6 pt-0 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
+    <div className="mx-auto max-w-4xl p-6 pt-0">
+      <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-[26px] font-bold text-foreground mb-1">Bookmarks</h1>
-          <p className="text-muted-foreground text-lg">Save and organize your favorite links</p>
+          <h1 className="text-foreground mb-1 text-[26px] font-bold">
+            Bookmarks
+          </h1>
+          <p className="text-muted-foreground text-lg">
+            Save and organize your favorite links
+          </p>
         </div>
-        <Button className="text-sm !h-10 py-2 px-3" variant="outline" onClick={openCreateModal}>
-          <IconPlus className="w-4 h-4 mr-2" />
+        <Button
+          className="!h-10 px-3 py-2 text-sm"
+          variant="outline"
+          onClick={openCreateModal}
+        >
+          <IconPlus className="mr-2 h-4 w-4" />
           Add Bookmark
         </Button>
       </div>
@@ -103,56 +129,60 @@ export function BookmarksSection() {
         {bookmarks.map((bookmark) => (
           <Card
             key={bookmark.id}
-            className="bg-card border-card hover:bg-card/80 transition-colors group cursor-pointer"
+            className="bg-card border-card hover:bg-card/80 group cursor-pointer transition-colors"
             onClick={() => openEditModal(bookmark)}
           >
             <CardHeader className="px-4">
               <div className="flex items-start gap-3">
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-foreground text-sm leading-tight mb-1 line-clamp-2">
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-foreground mb-1 line-clamp-2 text-sm leading-tight font-medium">
                     {bookmark.title}
                   </h3>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <IconWorld className="w-3 h-3" />
-                    <span className="truncate">{new URL(bookmark.url).hostname}</span>
+                  <div className="text-muted-foreground flex items-center gap-2 text-xs">
+                    <IconWorld className="h-3 w-3" />
+                    <span className="truncate">
+                      {new URL(bookmark.url).hostname}
+                    </span>
                   </div>
                 </div>
                 <div className="flex gap-1">
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 h-auto text-muted-foreground hover:text-destructive"
+                    className="text-muted-foreground hover:text-destructive h-auto p-1 opacity-0 transition-opacity group-hover:opacity-100"
                     onClick={(e) => {
                       e.stopPropagation()
-                      deleteBookmark(bookmark.id)
+                      handleDeleteBookmark(bookmark.id)
                     }}
                   >
-                    <IconTrash className="w-3 h-3" />
+                    <IconTrash className="h-3 w-3" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 h-auto text-muted-foreground hover:text-foreground"
+                    className="text-muted-foreground hover:text-foreground h-auto p-1 opacity-0 transition-opacity group-hover:opacity-100"
                     onClick={(e) => {
                       e.stopPropagation()
-                      window.open(bookmark.url, "_blank")
+                      window.open(bookmark.url, '_blank')
                     }}
                   >
-                    <IconExternalLink className="w-3 h-3" />
+                    <IconExternalLink className="h-3 w-3" />
                   </Button>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="pt-0 px-4">
-              <p className="text-muted-foreground text-xs mb-3 line-clamp-2">{bookmark.description}</p>
+            <CardContent className="px-4 pt-0">
+              <p className="text-muted-foreground mb-3 line-clamp-2 text-xs">
+                {bookmark.description}
+              </p>
               <div className="flex flex-wrap gap-1">
-                {bookmark.tags.map((tag) => (
+                {bookmark.tags?.map((tag) => (
                   <Badge
                     key={tag}
                     variant="outline"
-                    className="text-xs h-7 rounded-sm border-border text-muted-foreground bg-transparent"
+                    className="border-border text-muted-foreground h-7 rounded-sm bg-transparent text-xs"
                   >
-                    <IconTagFilled className="w-2 h-2 mr-1" />
+                    <IconTagFilled className="mr-1 h-2 w-2" />
                     {tag}
                   </Badge>
                 ))}
@@ -163,13 +193,15 @@ export function BookmarksSection() {
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[500px] border-none">
+        <DialogContent className="border-none sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle className="text-left text-lg">
               <Input
                 placeholder="Title"
                 value={formData.title}
-                onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, title: e.target.value }))
+                }
                 className="border-none !text-lg focus-visible:ring-0 focus-visible:ring-offset-0"
                 autoFocus
               />
@@ -177,58 +209,90 @@ export function BookmarksSection() {
           </DialogHeader>
 
           <div className="space-y-4">
-            <div className="flex items-center w-full rounded-md h-9 px-3 text-sm shadow-xs">
-              <IconWorld className="h-4 w-4 text-muted-foreground" />
+            <div className="flex h-9 w-full items-center rounded-md px-3 text-sm shadow-xs">
+              <IconWorld className="text-muted-foreground h-4 w-4" />
               <input
                 placeholder="URL"
                 value={formData.url}
-                onChange={(e) => setFormData((prev) => ({ ...prev, url: e.target.value }))}
-                className="w-full p-2 bg-transparent outline-none placeholder:text-muted-foreground"
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, url: e.target.value }))
+                }
+                className="placeholder:text-muted-foreground w-full bg-transparent p-2 outline-none"
               />
             </div>
             <TextareaAutosize
               placeholder="Description"
               value={formData.description}
-              onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-              className="flex w-full rounded-md bg-transparent px-3 pb-2 text-sm shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 border-none focus-visible:ring-0 focus-visible:ring-offset-0 resize-none"
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  description: e.target.value,
+                }))
+              }
+              className="placeholder:text-muted-foreground flex w-full resize-none rounded-md border-none bg-transparent px-3 pb-2 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50"
               minRows={1}
             />
-            <div className="flex w-full rounded-md bg-transparent px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 border-none focus-visible:ring-0 focus-visible:ring-offset-0 items-center flex-wrap gap-2">
+            <div className="placeholder:text-muted-foreground flex w-full flex-wrap items-center gap-2 rounded-md border-none bg-transparent px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50">
               {formData.tags.map((tag, index) => (
-                <Badge key={index} variant="outline" className="text-xs h-7 rounded-smborder-border text-muted-foreground bg-transparent">
-                  <IconTagFilled className="w-2 h-2 mr-1" />
+                <Badge
+                  key={index}
+                  variant="outline"
+                  className="rounded-smborder-border text-muted-foreground h-7 bg-transparent text-xs"
+                >
+                  <IconTagFilled className="mr-1 h-2 w-2" />
                   {tag}
-                  <button onClick={() => setFormData(prev => ({ ...prev, tags: prev.tags.filter((_, i) => i !== index) }))} className="ml-1 rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
-                    <IconX className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                  <button
+                    onClick={() =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        tags: prev.tags.filter((_, i) => i !== index),
+                      }))
+                    }
+                    className="focus:ring-ring ml-1 rounded-full outline-none focus:ring-2 focus:ring-offset-2"
+                  >
+                    <IconX className="text-muted-foreground hover:text-foreground h-3 w-3" />
                   </button>
                 </Badge>
               ))}
               <input
                 type="text"
-                className="flex-1 bg-transparent outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                className="placeholder:text-muted-foreground flex-1 bg-transparent outline-none disabled:cursor-not-allowed disabled:opacity-50"
                 placeholder="Add tags"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ',') {
-                    e.preventDefault();
-                    const newTag = e.currentTarget.value.trim();
+                    e.preventDefault()
+                    const newTag = e.currentTarget.value.trim()
                     if (newTag && !formData.tags.includes(newTag)) {
-                      setFormData(prev => ({ ...prev, tags: [...prev.tags, newTag] }));
-                      e.currentTarget.value = "";
+                      setFormData((prev) => ({
+                        ...prev,
+                        tags: [...prev.tags, newTag],
+                      }))
+                      e.currentTarget.value = ''
                     }
-                  } else if (e.key === 'Backspace' && e.currentTarget.value === '') {
-                    setFormData(prev => ({...prev, tags: prev.tags.slice(0, -1)}));
+                  } else if (
+                    e.key === 'Backspace' &&
+                    e.currentTarget.value === ''
+                  ) {
+                    setFormData((prev) => ({
+                      ...prev,
+                      tags: prev.tags.slice(0, -1),
+                    }))
                   }
                 }}
               />
             </div>
           </div>
 
-          <div className="flex justify-between items-center pt-4">
+          <div className="flex items-center justify-between pt-4">
             <div>
               {isEditMode && editingBookmark && (
-                  <Button variant="ghost" className="text-destructive hover:text-destructive" onClick={() => deleteBookmark(editingBookmark.id)}>
-                      Delete
-                  </Button>
+                <Button
+                  variant="ghost"
+                  className="text-destructive hover:text-destructive"
+                  onClick={() => deleteBookmark(editingBookmark.id)}
+                >
+                  Delete
+                </Button>
               )}
             </div>
             <div className="flex gap-2">
@@ -236,11 +300,11 @@ export function BookmarksSection() {
                 Cancel
               </Button>
               <Button
-                onClick={saveBookmark}
+                onClick={handleSaveBookmark}
                 disabled={!formData.title.trim() || !formData.url.trim()}
                 variant="outline"
               >
-                {isEditMode ? "Save" : "Add bookmark"}
+                {isEditMode ? 'Save' : 'Add bookmark'}
               </Button>
             </div>
           </div>
