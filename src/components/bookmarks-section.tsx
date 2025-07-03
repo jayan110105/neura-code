@@ -27,6 +27,7 @@ import { useState } from 'react'
 import TextareaAutosize from 'react-textarea-autosize'
 import { toast } from 'sonner'
 import { Bookmark } from '@/types'
+import { useOptimistic, useTransition } from 'react'
 
 type BookmarkForm = {
   title: string
@@ -35,7 +36,35 @@ type BookmarkForm = {
   tags: string[]
 }
 
+type Action =
+  | { type: 'add'; bookmark: Bookmark }
+  | { type: 'update'; bookmark: Bookmark }
+  | { type: 'delete'; id: number }
+
+function optimisticReducer(
+  state: Bookmark[],
+  { type, bookmark, id }: { type: Action['type']; bookmark?: Bookmark; id?: number },
+) {
+  switch (type) {
+    case 'add':
+      return [bookmark as Bookmark, ...state]
+    case 'update':
+      return state.map((b) =>
+        b.id === (bookmark as Bookmark).id ? { ...b, ...bookmark } : b,
+      )
+    case 'delete':
+      return state.filter((b) => b.id !== id)
+    default:
+      return state
+  }
+}
+
 export function BookmarksSection({ bookmarks }: { bookmarks: Bookmark[] }) {
+  const [optimisticBookmarks, addOptimisticBookmark] = useOptimistic(
+    bookmarks,
+    optimisticReducer,
+  )
+  const [isPending, startTransition] = useTransition()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingBookmark, setEditingBookmark] = useState<Bookmark | null>(null)
 
@@ -69,8 +98,11 @@ export function BookmarksSection({ bookmarks }: { bookmarks: Bookmark[] }) {
   }
 
   const handleDeleteBookmark = async (id: number) => {
-    await deleteBookmark(id)
-    closeModal()
+    startTransition(async () => {
+      addOptimisticBookmark({ type: 'delete', id })
+      await deleteBookmark(id)
+      closeModal()
+    })
   }
 
   const handleSaveBookmark = async () => {
@@ -83,23 +115,32 @@ export function BookmarksSection({ bookmarks }: { bookmarks: Bookmark[] }) {
       return
     }
 
+    closeModal()
+
     if (editingBookmark) {
-      await updateBookmark(editingBookmark.id, {
-        title: formData.title,
-        url: formData.url,
-        description: formData.description,
-        tags: formData.tags,
+      const updatedBookmark = {
+        ...editingBookmark,
+        ...formData,
+      }
+      startTransition(async () => {
+        addOptimisticBookmark({ type: 'update', bookmark: updatedBookmark })
+        await updateBookmark(editingBookmark.id, formData)
       })
     } else {
-      await createBookmark({
-        title: formData.title,
-        url: formData.url,
-        description: formData.description,
-        tags: formData.tags,
+      const newBookmark = {
+        id: Date.now(),
+        ...formData,
+        userId: '',
+        timestamp: new Date().toISOString(),
+      }
+      startTransition(async () => {
+        addOptimisticBookmark({
+          type: 'add',
+          bookmark: newBookmark as unknown as Bookmark,
+        })
+        await createBookmark(formData)
       })
     }
-
-    closeModal()
   }
 
   const isEditMode = Boolean(editingBookmark)
@@ -126,7 +167,7 @@ export function BookmarksSection({ bookmarks }: { bookmarks: Bookmark[] }) {
       </div>
 
       <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-        {bookmarks.map((bookmark) => (
+        {optimisticBookmarks.map((bookmark) => (
           <Card
             key={bookmark.id}
             className="bg-card border-card hover:bg-card/80 group cursor-pointer transition-colors"
@@ -289,7 +330,7 @@ export function BookmarksSection({ bookmarks }: { bookmarks: Bookmark[] }) {
                 <Button
                   variant="ghost"
                   className="text-destructive hover:text-destructive"
-                  onClick={() => deleteBookmark(editingBookmark.id)}
+                  onClick={() => handleDeleteBookmark(editingBookmark.id)}
                 >
                   Delete
                 </Button>

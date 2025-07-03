@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useOptimistic, useTransition, useState } from 'react'
 import {
   createTodo,
   deleteTodo,
@@ -39,7 +39,39 @@ import {
 } from '@/components/ui/select'
 import { Todo } from '@/types'
 
+type Action =
+  | { type: 'add'; todo: Todo }
+  | { type: 'update'; todo: Todo }
+  | { type: 'delete'; id: number }
+  | { type: 'toggle'; id: number }
+
+function optimisticReducer(
+  state: Todo[],
+  { type, todo, id }: { type: Action['type']; todo?: Todo; id?: number },
+) {
+  switch (type) {
+    case 'add':
+      return [...state, todo as Todo]
+    case 'update':
+      return state.map((t) => (t.id === (todo as Todo).id ? { ...t, ...todo } : t))
+    case 'delete':
+      return state.filter((t) => t.id !== id)
+    case 'toggle':
+      return state.map((t) =>
+        t.id === id ? { ...t, completed: !t.completed } : t,
+      )
+    default:
+      return state
+  }
+}
+
 export function TodoSection({ todos }: { todos: Todo[] }) {
+  const [optimisticTodos, addOptimisticTodo] = useOptimistic(
+    todos,
+    optimisticReducer,
+  )
+  const [isPending, startTransition] = useTransition()
+
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
   const [editingTask, setEditingTask] = useState<Todo | null>(null)
@@ -97,29 +129,38 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
   const handleFormSubmit = async () => {
     if (!formData.title.trim()) return
 
+    closeModal()
+
     if (isEditMode && editingTask) {
-      await updateTodo(editingTask.id, {
+      const updatedTodo = {
+        id: editingTask.id,
         title: formData.title,
         priority: formData.priority,
         dueDate: formData.dueDate,
+        completed: editingTask.completed,
+      }
+      startTransition(async () => {
+        addOptimisticTodo({
+          type: 'update',
+          todo: updatedTodo as unknown as Todo,
+        })
+        await updateTodo(editingTask.id, formData)
       })
     } else {
-      await createTodo({
+      const newTodo = {
+        id: Date.now(),
         title: formData.title,
         priority: formData.priority,
         dueDate: formData.dueDate,
+        completed: false,
+        userId: '', // This will be set by the server
+        category: null,
+      }
+      startTransition(async () => {
+        addOptimisticTodo({ type: 'add', todo: newTodo as unknown as Todo })
+        await createTodo(formData)
       })
     }
-
-    // Reset form
-    setFormData({
-      title: '',
-      priority: 'Medium',
-      reminder: '',
-    })
-    setIsCreateModalOpen(false)
-    setIsEditMode(false)
-    setEditingTask(null)
   }
 
   const closeModal = () => {
@@ -146,12 +187,12 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
     }
   }
 
-  const todayTodos = todos.filter(
+  const todayTodos = optimisticTodos.filter(
     (todo) =>
       todo.dueDate &&
       new Date(todo.dueDate).toDateString() === new Date().toDateString(),
   )
-  const upcomingTodos = todos.filter(
+  const upcomingTodos = optimisticTodos.filter(
     (todo) =>
       !todo.dueDate ||
       new Date(todo.dueDate).toDateString() !== new Date().toDateString(),
@@ -167,8 +208,11 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
           <IconGripVertical className="text-muted-foreground h-4 w-4 cursor-grab" />
           <Checkbox
             checked={todo.completed}
-            onCheckedChange={async (checked) => {
-              await toggleTodo(todo.id, todo.completed)
+            onCheckedChange={async () => {
+              startTransition(async () => {
+                addOptimisticTodo({ type: 'toggle', id: todo.id })
+                await toggleTodo(todo.id, todo.completed)
+              })
             }}
             onClick={(e) => e.stopPropagation()}
             className="border-muted-foreground data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground h-5 w-5 cursor-pointer rounded-full"
@@ -214,7 +258,10 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
             className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100"
             onClick={(e) => {
               e.stopPropagation()
-              deleteTodo(todo.id)
+              startTransition(async () => {
+                addOptimisticTodo({ type: 'delete', id: todo.id })
+                await deleteTodo(todo.id)
+              })
             }}
           >
             <IconTrash className="h-5 w-5" />

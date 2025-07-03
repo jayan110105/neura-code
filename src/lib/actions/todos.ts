@@ -3,7 +3,7 @@
 import { db } from '@/db'
 import { todos } from '@/db/schema'
 import { auth } from '@/lib/auth'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 
@@ -27,17 +27,22 @@ export async function createTodo(formData: {
 }) {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session?.user?.id) {
-    return { error: 'Not authenticated' }
+    throw new Error('Not authenticated')
   }
 
-  await db.insert(todos).values({
-    title: formData.title,
-    priority: formData.priority,
-    dueDate: formData.dueDate,
-    userId: session.user.id,
-  })
+  const [newTodo] = await db
+    .insert(todos)
+    .values({
+      title: formData.title,
+      priority: formData.priority,
+      dueDate: formData.dueDate,
+      userId: session.user.id,
+    })
+    .returning()
 
   revalidatePath('/')
+  revalidatePath('/todo')
+  return newTodo
 }
 
 export async function updateTodo(
@@ -51,10 +56,10 @@ export async function updateTodo(
 ) {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session?.user?.id) {
-    return { error: 'Not authenticated' }
+    throw new Error('Not authenticated')
   }
 
-  await db
+  const [updatedTodo] = await db
     .update(todos)
     .set({
       title: formData.title,
@@ -62,29 +67,43 @@ export async function updateTodo(
       dueDate: formData.dueDate,
       completed: formData.completed,
     })
-    .where(eq(todos.id, id))
+    .where(and(eq(todos.id, id), eq(todos.userId, session.user.id)))
+    .returning()
 
   revalidatePath('/')
+  revalidatePath('/todo')
+  return updatedTodo
 }
 
 export async function toggleTodo(id: number, completed: boolean) {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session?.user?.id) {
-    return { error: 'Not authenticated' }
+    throw new Error('Not authenticated')
   }
 
-  await db.update(todos).set({ completed: !completed }).where(eq(todos.id, id))
+  const [toggledTodo] = await db
+    .update(todos)
+    .set({ completed: !completed })
+    .where(and(eq(todos.id, id), eq(todos.userId, session.user.id)))
+    .returning()
 
   revalidatePath('/')
+  revalidatePath('/todo')
+  return toggledTodo
 }
 
 export async function deleteTodo(id: number) {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session?.user?.id) {
-    return { error: 'Not authenticated' }
+    throw new Error('Not authenticated')
   }
 
-  await db.delete(todos).where(eq(todos.id, id))
+  const [deletedTodo] = await db
+    .delete(todos)
+    .where(and(eq(todos.id, id), eq(todos.userId, session.user.id)))
+    .returning({ id: todos.id })
 
   revalidatePath('/')
+  revalidatePath('/todo')
+  return deletedTodo
 }

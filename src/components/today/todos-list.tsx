@@ -1,5 +1,6 @@
 'use client'
 
+import { useOptimistic, useTransition } from 'react'
 import { toggleTodo } from '@/lib/actions/todos'
 import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -15,8 +16,21 @@ interface TodosListProps {
   onTodoClick?: (todo: Todo) => void
 }
 
+function optimisticReducer(
+  state: Todo[],
+  { id }: { id: number },
+) {
+  return state.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t))
+}
+
 export function TodosList({ todos, onTodoClick }: TodosListProps) {
-  if (todos.length === 0) return null
+  const [optimisticTodos, toggleOptimisticTodo] = useOptimistic(
+    todos,
+    optimisticReducer,
+  )
+  const [isPending, startTransition] = useTransition()
+
+  if (optimisticTodos.length === 0) return null
 
   const getPriorityIconColor = (priority: string | null) => {
     switch (priority) {
@@ -45,7 +59,7 @@ export function TodosList({ todos, onTodoClick }: TodosListProps) {
       <Card className="bg-card border-none">
         <CardContent className="px-4">
           <div className="space-y-2">
-            {todos.map((todo) => (
+            {optimisticTodos.map((todo) => (
               <div
                 key={todo.id}
                 className="hover:bg-muted/50 flex cursor-pointer gap-3 rounded-md p-2 transition-colors"
@@ -53,8 +67,11 @@ export function TodosList({ todos, onTodoClick }: TodosListProps) {
               >
                 <Checkbox
                   checked={todo.completed || false}
-                  onCheckedChange={async (checked) => {
-                    await toggleTodo(todo.id, todo.completed)
+                  onCheckedChange={() => {
+                    startTransition(async () => {
+                      toggleOptimisticTodo({ id: todo.id })
+                      await toggleTodo(todo.id, todo.completed)
+                    })
                   }}
                   onClick={(e) => e.stopPropagation()}
                   className="border-muted-foreground data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground h-5 w-5 cursor-pointer rounded-full"

@@ -3,7 +3,7 @@
 import { db } from '@/db'
 import { reminders } from '@/db/schema'
 import { auth } from '@/lib/auth'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 
@@ -30,15 +30,20 @@ export async function createReminder(formData: {
 }) {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session?.user?.id) {
-    return { error: 'Not authenticated' }
+    throw new Error('Not authenticated')
   }
 
-  await db.insert(reminders).values({
-    ...formData,
-    userId: session.user.id,
-  })
+  const [newReminder] = await db
+    .insert(reminders)
+    .values({
+      ...formData,
+      userId: session.user.id,
+    })
+    .returning()
 
   revalidatePath('/')
+  revalidatePath('/reminders')
+  return newReminder
 }
 
 export async function updateReminder(
@@ -54,40 +59,51 @@ export async function updateReminder(
 ) {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session?.user?.id) {
-    return { error: 'Not authenticated' }
+    throw new Error('Not authenticated')
   }
 
-  await db
+  const [updatedReminder] = await db
     .update(reminders)
     .set({
       ...formData,
     })
-    .where(eq(reminders.id, id))
+    .where(and(eq(reminders.id, id), eq(reminders.userId, session.user.id)))
+    .returning()
 
   revalidatePath('/')
+  revalidatePath('/reminders')
+  return updatedReminder
 }
 
 export async function toggleReminder(id: number, enabled: boolean) {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session?.user?.id) {
-    return { error: 'Not authenticated' }
+    throw new Error('Not authenticated')
   }
 
-  await db
+  const [toggledReminder] = await db
     .update(reminders)
     .set({ enabled: !enabled })
-    .where(eq(reminders.id, id))
+    .where(and(eq(reminders.id, id), eq(reminders.userId, session.user.id)))
+    .returning()
 
   revalidatePath('/')
+  revalidatePath('/reminders')
+  return toggledReminder
 }
 
 export async function deleteReminder(id: number) {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session?.user?.id) {
-    return { error: 'Not authenticated' }
+    throw new Error('Not authenticated')
   }
 
-  await db.delete(reminders).where(eq(reminders.id, id))
+  const [deletedReminder] = await db
+    .delete(reminders)
+    .where(and(eq(reminders.id, id), eq(reminders.userId, session.user.id)))
+    .returning({ id: reminders.id })
 
   revalidatePath('/')
+  revalidatePath('/reminders')
+  return deletedReminder
 }

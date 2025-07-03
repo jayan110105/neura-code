@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useOptimistic, useTransition, useState } from 'react'
 import { createNote, deleteNote, updateNote } from '@/lib/actions/notes'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -16,7 +16,33 @@ import {
 import { IconPlus, IconTrash } from '@tabler/icons-react'
 import { Note } from '@/types'
 
+type Action =
+  | { type: 'add'; note: Note }
+  | { type: 'update'; note: Note }
+  | { type: 'delete'; id: number }
+
+function optimisticReducer(
+  state: Note[],
+  { type, note, id }: { type: Action['type']; note?: Note; id?: number },
+) {
+  switch (type) {
+    case 'add':
+      return [note as Note, ...state]
+    case 'update':
+      return state.map((n) => (n.id === (note as Note).id ? { ...n, ...note } : n))
+    case 'delete':
+      return state.filter((n) => n.id !== id)
+    default:
+      return state
+  }
+}
+
 export function NotesSection({ notes }: { notes: Note[] }) {
+  const [optimisticNotes, addOptimisticNote] = useOptimistic(
+    notes,
+    optimisticReducer,
+  )
+  const [isPending, startTransition] = useTransition()
   const [editingNote, setEditingNote] = useState<Note | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [editForm, setEditForm] = useState({ title: '', content: '' })
@@ -34,19 +60,40 @@ export function NotesSection({ notes }: { notes: Note[] }) {
   }
 
   const handleSaveNote = async () => {
+    setIsEditDialogOpen(false)
+
     if (editingNote) {
-      await updateNote(editingNote.id, {
-        title: editForm.title,
-        content: editForm.content,
+      const updatedNote = {
+        ...editingNote,
+        ...editForm,
+      }
+      startTransition(async () => {
+        addOptimisticNote({ type: 'update', note: updatedNote })
+        await updateNote(editingNote.id, editForm)
       })
     } else {
-      await createNote({
-        title: editForm.title || 'Untitled Note',
-        content: editForm.content,
+      const newNote = {
+        id: Date.now(),
+        ...editForm,
+        userId: '',
+        timestamp: new Date().toISOString(),
+      }
+      startTransition(async () => {
+        addOptimisticNote({ type: 'add', note: newNote as unknown as Note })
+        await createNote({
+          title: editForm.title || 'Untitled Note',
+          content: editForm.content,
+        })
       })
     }
-    setIsEditDialogOpen(false)
     setEditingNote(null)
+  }
+
+  const handleDeleteNote = (id: number) => {
+    startTransition(async () => {
+      addOptimisticNote({ type: 'delete', id })
+      await deleteNote(id)
+    })
   }
 
   return (
@@ -69,7 +116,7 @@ export function NotesSection({ notes }: { notes: Note[] }) {
       </div>
 
       <div className="grid grid-cols-1 gap-4 space-y-3 md:grid-cols-2 lg:grid-cols-3">
-        {notes.map((note) => (
+        {optimisticNotes.map((note) => (
           <Card
             key={note.id}
             className="bg-card group h-72 cursor-pointer border-none transition-shadow hover:shadow-md"
@@ -85,7 +132,7 @@ export function NotesSection({ notes }: { notes: Note[] }) {
                 className="text-muted-foreground hover:text-destructive shrink-0 p-0 opacity-0 transition-opacity group-hover:opacity-100"
                 onClick={(e) => {
                   e.stopPropagation()
-                  deleteNote(note.id)
+                  handleDeleteNote(note.id)
                 }}
               >
                 <IconTrash className="h-4 w-4" />

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useOptimistic, useTransition, useState } from 'react'
 import {
   createReminder,
   deleteReminder,
@@ -46,7 +46,42 @@ type ReminderForm = {
   category: 'Work' | 'Health' | 'Personal' | 'Finance' | null
 }
 
+type Action =
+  | { type: 'add'; reminder: Reminder }
+  | { type: 'update'; reminder: Reminder }
+  | { type: 'delete'; id: number }
+  | { type: 'toggle'; id: number }
+
+function optimisticReducer(
+  state: Reminder[],
+  {
+    type,
+    reminder,
+    id,
+  }: { type: Action['type']; reminder?: Reminder; id?: number },
+) {
+  switch (type) {
+    case 'add':
+      return [reminder as Reminder, ...state]
+    case 'update':
+      return state.map((r) =>
+        r.id === (reminder as Reminder).id ? { ...r, ...reminder } : r,
+      )
+    case 'delete':
+      return state.filter((r) => r.id !== id)
+    case 'toggle':
+      return state.map((r) => (r.id === id ? { ...r, enabled: !r.enabled } : r))
+    default:
+      return state
+  }
+}
+
 export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
+  const [optimisticReminders, addOptimisticReminder] = useOptimistic(
+    reminders,
+    optimisticReducer,
+  )
+  const [isPending, startTransition] = useTransition()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingReminder, setEditingReminder] = useState<Reminder | null>(null)
 
@@ -105,22 +140,50 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
   const handleSaveReminder = async () => {
     if (!formData.title.trim()) return
 
+    closeModal()
+
     const dataToSave = {
       ...formData,
       date: formData.date ? format(formData.date, 'yyyy-MM-dd') : null,
     }
 
     if (editingReminder) {
-      await updateReminder(editingReminder.id, dataToSave)
+      const updatedReminder = {
+        ...editingReminder,
+        ...dataToSave,
+      }
+      startTransition(async () => {
+        addOptimisticReminder({ type: 'update', reminder: updatedReminder as Reminder })
+        await updateReminder(editingReminder.id, dataToSave)
+      })
     } else {
-      await createReminder(dataToSave)
+      const newReminder = {
+        id: Date.now(),
+        ...dataToSave,
+        userId: '',
+        enabled: true,
+        timestamp: new Date().toISOString(),
+      }
+      startTransition(async () => {
+        addOptimisticReminder({ type: 'add', reminder: newReminder as unknown as Reminder })
+        await createReminder(dataToSave)
+      })
     }
-    closeModal()
   }
 
   const handleDeleteReminder = async (id: number) => {
-    await deleteReminder(id)
-    closeModal()
+    startTransition(async () => {
+      addOptimisticReminder({ type: 'delete', id })
+      await deleteReminder(id)
+      closeModal()
+    })
+  }
+
+  const handleToggleReminder = (id: number, enabled: boolean) => {
+    startTransition(async () => {
+      addOptimisticReminder({ type: 'toggle', id })
+      await toggleReminder(id, enabled)
+    })
   }
 
   const getRepeatColorClass = (
@@ -179,7 +242,7 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
       </div>
 
       <div className="grid gap-3 md:grid-cols-2">
-        {reminders.map((reminder) => {
+        {optimisticReminders.map((reminder) => {
           return (
             <Card
               key={reminder.id}
@@ -224,7 +287,7 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
                     <Switch
                       checked={reminder.enabled}
                       onCheckedChange={() =>
-                        toggleReminder(reminder.id, !reminder.enabled)
+                        handleToggleReminder(reminder.id, reminder.enabled)
                       }
                       onClick={(e) => e.stopPropagation()}
                       className="data-[state=checked]:bg-primary"

@@ -3,7 +3,7 @@
 import { db } from '@/db'
 import { bookmarks } from '@/db/schema'
 import { auth } from '@/lib/auth'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 
@@ -28,15 +28,20 @@ export async function createBookmark(formData: {
 }) {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session?.user?.id) {
-    return { error: 'Not authenticated' }
+    throw new Error('Not authenticated')
   }
 
-  await db.insert(bookmarks).values({
-    ...formData,
-    userId: session.user.id,
-  })
+  const [newBookmark] = await db
+    .insert(bookmarks)
+    .values({
+      ...formData,
+      userId: session.user.id,
+    })
+    .returning()
 
   revalidatePath('/')
+  revalidatePath('/bookmarks')
+  return newBookmark
 }
 
 export async function updateBookmark(
@@ -50,26 +55,34 @@ export async function updateBookmark(
 ) {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session?.user?.id) {
-    return { error: 'Not authenticated' }
+    throw new Error('Not authenticated')
   }
 
-  await db
+  const [updatedBookmark] = await db
     .update(bookmarks)
     .set({
       ...formData,
     })
-    .where(eq(bookmarks.id, id))
+    .where(and(eq(bookmarks.id, id), eq(bookmarks.userId, session.user.id)))
+    .returning()
 
   revalidatePath('/')
+  revalidatePath('/bookmarks')
+  return updatedBookmark
 }
 
 export async function deleteBookmark(id: number) {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session?.user?.id) {
-    return { error: 'Not authenticated' }
+    throw new Error('Not authenticated')
   }
 
-  await db.delete(bookmarks).where(eq(bookmarks.id, id))
+  const [deletedBookmark] = await db
+    .delete(bookmarks)
+    .where(and(eq(bookmarks.id, id), eq(bookmarks.userId, session.user.id)))
+    .returning({ id: bookmarks.id })
 
   revalidatePath('/')
+  revalidatePath('/bookmarks')
+  return deletedBookmark
 }

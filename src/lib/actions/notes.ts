@@ -3,7 +3,7 @@
 import { db } from '@/db'
 import { notes } from '@/db/schema'
 import { auth } from '@/lib/auth'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 
@@ -23,16 +23,21 @@ export async function getNotes() {
 export async function createNote(formData: { title: string; content: string }) {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session?.user?.id) {
-    return { error: 'Not authenticated' }
+    throw new Error('Not authenticated')
   }
 
-  await db.insert(notes).values({
-    title: formData.title,
-    content: formData.content,
-    userId: session.user.id,
-  })
+  const [newNote] = await db
+    .insert(notes)
+    .values({
+      title: formData.title,
+      content: formData.content,
+      userId: session.user.id,
+    })
+    .returning()
 
   revalidatePath('/')
+  revalidatePath('/notes')
+  return newNote
 }
 
 export async function updateNote(
@@ -44,27 +49,35 @@ export async function updateNote(
 ) {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session?.user?.id) {
-    return { error: 'Not authenticated' }
+    throw new Error('Not authenticated')
   }
 
-  await db
+  const [updatedNote] = await db
     .update(notes)
     .set({
       title: formData.title,
       content: formData.content,
     })
-    .where(eq(notes.id, id))
+    .where(and(eq(notes.id, id), eq(notes.userId, session.user.id)))
+    .returning()
 
   revalidatePath('/')
+  revalidatePath('/notes')
+  return updatedNote
 }
 
 export async function deleteNote(id: number) {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session?.user?.id) {
-    return { error: 'Not authenticated' }
+    throw new Error('Not authenticated')
   }
 
-  await db.delete(notes).where(eq(notes.id, id))
+  const [deletedNote] = await db
+    .delete(notes)
+    .where(and(eq(notes.id, id), eq(notes.userId, session.user.id)))
+    .returning({ id: notes.id })
 
   revalidatePath('/')
+  revalidatePath('/notes')
+  return deletedNote
 }
