@@ -8,6 +8,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarTrigger,
+  SidebarFooter,
 } from "@/components/ui/sidebar"
 import { 
   IconFileText, 
@@ -21,9 +22,11 @@ import {
   IconAlarm,
   IconAlarmFilled,
   IconCopyCheck,
-  IconCopyCheckFilled
+  IconCopyCheckFilled,
+  IconLogout,
 } from "@tabler/icons-react"
-import { Input } from "@/components/ui/input"
+import { authClient } from "@/lib/auth-client"
+import { useRouter } from "next/navigation"
 
 const menuItems = [
   {
@@ -70,6 +73,18 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps) {
+  const router = useRouter()
+
+  const handleSignOut = async () => {
+    await authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.push("/sign-in")
+        },
+      },
+    })
+  }
+
   return (
     <Sidebar className="border-r border-none bg-sidebar">
       <SidebarHeader className="p-3 px-6">
@@ -105,6 +120,19 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
           })}
         </SidebarMenu>
       </SidebarContent>
+      <SidebarFooter className="p-3">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              onClick={handleSignOut}
+              className="w-full rounded-sm justify-start gap-3 px-3 !h-9 transition-all duration-150 text-sm font-medium text-muted-foreground hover:bg-sidebar-accent"
+            >
+              <IconLogout className="!size-6" />
+              <span>Sign Out</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   )
 }

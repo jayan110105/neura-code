@@ -136,3 +136,14 @@
   -webkit-line-clamp: 6;
   text-overflow: ellipsis;
 }
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px oklch(0.2393 0 0) inset !important;
+  -webkit-text-fill-color: oklch(0.985 0 0) !important;
+  caret-color: oklch(0.985 0 0) !important;
+  border: 1px solid var(--input) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
