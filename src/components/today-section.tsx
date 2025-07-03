@@ -69,10 +69,7 @@ export function TodaySection({
         bookmarks={bookmarks}
         onBookmarkClick={handleBookmarkClick}
       />
-      <TodosList
-        todos={todos}
-        onTodoClick={handleTodoClick}
-      />
+      <TodosList todos={todos} onTodoClick={handleTodoClick} />
       <RemindersList
         reminders={reminders}
         onReminderClick={handleReminderClick}

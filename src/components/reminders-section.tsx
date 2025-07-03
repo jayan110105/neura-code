@@ -198,11 +198,12 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
                     <div className="text-muted-foreground flex items-center gap-2 text-xs">
                       <IconCalendarFilled className="h-3 w-3" />
                       <span>
-                        {reminder.date && new Date(reminder.date).toLocaleDateString('en-GB', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric',
-                        })}
+                        {reminder.date &&
+                          new Date(reminder.date).toLocaleDateString('en-GB', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                          })}
                       </span>
                       <IconAlarmFilled className="ml-2 h-3 w-3" />
                       <span>{reminder.time}</span>
@@ -222,7 +223,9 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
                     </Button>
                     <Switch
                       checked={reminder.enabled}
-                      onCheckedChange={() => toggleReminder(reminder.id, !reminder.enabled)}
+                      onCheckedChange={() =>
+                        toggleReminder(reminder.id, !reminder.enabled)
+                      }
                       onClick={(e) => e.stopPropagation()}
                       className="data-[state=checked]:bg-primary"
                     />
