@@ -23,7 +23,8 @@ import {
   IconX,
   IconTrash,
 } from '@tabler/icons-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import TextareaAutosize from 'react-textarea-autosize'
 import { toast } from 'sonner'
 import { Bookmark } from '@/types'
@@ -67,6 +68,7 @@ export function BookmarksSection({ bookmarks }: { bookmarks: Bookmark[] }) {
   const [isPending, startTransition] = useTransition()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingBookmark, setEditingBookmark] = useState<Bookmark | null>(null)
+  const searchParams = useSearchParams()
 
   const [formData, setFormData] = useState<BookmarkForm>({
     title: '',
@@ -74,6 +76,18 @@ export function BookmarksSection({ bookmarks }: { bookmarks: Bookmark[] }) {
     description: '',
     tags: [],
   })
+
+  useEffect(() => {
+    const bookmarkId = searchParams.get('id')
+    if (bookmarkId) {
+      const bookmarkToEdit = bookmarks.find(
+        (bookmark) => bookmark.id === Number(bookmarkId),
+      )
+      if (bookmarkToEdit) {
+        openEditModal(bookmarkToEdit)
+      }
+    }
+  }, [searchParams, bookmarks])
 
   const openCreateModal = () => {
     setEditingBookmark(null)
@@ -170,13 +184,13 @@ export function BookmarksSection({ bookmarks }: { bookmarks: Bookmark[] }) {
         {optimisticBookmarks.map((bookmark) => (
           <Card
             key={bookmark.id}
-            className="bg-card border-card hover:bg-card/80 group cursor-pointer transition-colors"
+            className="bg-card border-card hover:bg-card/80 group cursor-pointer transition-colors gap-2"
             onClick={() => openEditModal(bookmark)}
           >
             <CardHeader className="px-4">
               <div className="flex items-start gap-3">
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-foreground mb-1 line-clamp-2 text-sm leading-tight font-medium">
+                  <h3 className="text-foreground mb-2 line-clamp-2 text-sm leading-tight font-medium">
                     {bookmark.title}
                   </h3>
                   <div className="text-muted-foreground flex items-center gap-2 text-xs">

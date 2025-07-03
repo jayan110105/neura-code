@@ -4,5 +4,6 @@ export interface Todo {
   completed: boolean
   priority: 'High' | 'Medium' | 'Low' | null
   dueDate: Date | null
-  category: string | null
+  reminderTime: string | null
+  category: 'Work' | 'Health' | 'Personal' | 'Finance' | null
 }

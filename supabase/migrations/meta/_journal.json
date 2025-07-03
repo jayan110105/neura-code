@@ -15,6 +15,13 @@
       "when": 1751562805071,
       "tag": "0001_sleepy_the_spike",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1751576102552,
+      "tag": "0002_keen_sage",
+      "breakpoints": true
     }
   ]
 }

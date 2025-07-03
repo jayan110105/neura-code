@@ -31,7 +31,8 @@ export const todos = pgTable('todos', {
   completed: boolean('completed').default(false).notNull(),
   priority: priorityEnum('priority'),
   dueDate: timestamp('due_date'),
-  category: text('category'),
+  reminderTime: time('reminder_time'),
+  category: categoryEnum('category'),
   userId: text('user_id')
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),

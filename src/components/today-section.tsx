@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { NotesGrid } from '@/components/today/notes-grid'
 import { BookmarksGrid } from '@/components/today/bookmarks-grid'
@@ -20,30 +21,29 @@ export function TodaySection({
   notes,
   bookmarks,
 }: TodaySectionProps) {
+  const router = useRouter()
   const totalItems =
     notes.length + bookmarks.length + todos.length + reminders.length
   const aiSummary = `You have ${notes.length} notes, ${bookmarks.length} bookmarks, ${todos.length} todos, and ${reminders.length} reminders. A total of ${totalItems} items to manage.`
 
   const handleNoteClick = (noteId: number) => {
-    console.log('Navigate to notes tab with note:', noteId)
+    router.push(`/notes?id=${noteId}`)
   }
 
-  const handleBookmarkClick = (bookmark: any) => {
-    if (bookmark.url) {
-      window.open(bookmark.url, '_blank')
-    }
+  const handleBookmarkClick = (bookmark: Bookmark) => {
+    router.push(`/bookmarks?id=${bookmark.id}`)
   }
 
-  const handleTodoClick = (todo: any) => {
-    console.log('Todo clicked:', todo.id)
+  const handleTodoClick = (todo: Todo) => {
+    router.push(`/todos?id=${todo.id}`)
   }
 
   const handleTodoToggle = (todoId: number) => {
     console.log('Todo toggled:', todoId)
   }
 
-  const handleReminderClick = (reminder: any) => {
-    console.log('Reminder clicked:', reminder.id)
+  const handleReminderClick = (reminder: Reminder) => {
+    router.push(`/reminders?id=${reminder.id}`)
   }
 
   return (

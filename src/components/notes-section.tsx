@@ -1,6 +1,7 @@
 'use client'
 
-import { useOptimistic, useTransition, useState } from 'react'
+import { useOptimistic, useTransition, useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createNote, deleteNote, updateNote } from '@/lib/actions/notes'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -46,6 +47,17 @@ export function NotesSection({ notes }: { notes: Note[] }) {
   const [editingNote, setEditingNote] = useState<Note | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [editForm, setEditForm] = useState({ title: '', content: '' })
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const noteId = searchParams.get('id')
+    if (noteId) {
+      const noteToEdit = notes.find((note) => note.id === Number(noteId))
+      if (noteToEdit) {
+        handleEditNote(noteToEdit)
+      }
+    }
+  }, [searchParams, notes])
 
   const handleEditNote = (note: Note) => {
     setEditingNote(note)
@@ -119,7 +131,7 @@ export function NotesSection({ notes }: { notes: Note[] }) {
         {optimisticNotes.map((note) => (
           <Card
             key={note.id}
-            className="bg-card group h-72 cursor-pointer border-none transition-shadow hover:shadow-md"
+            className="bg-card group h-72 cursor-pointer border-none transition-shadow hover:shadow-md gap-2"
             onClick={() => handleEditNote(note)}
           >
             <CardHeader className="flex items-start justify-between gap-2">

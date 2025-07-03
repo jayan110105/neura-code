@@ -1,6 +1,7 @@
 'use client'
 
-import { useOptimistic, useTransition, useState } from 'react'
+import { useOptimistic, useTransition, useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import {
   createTodo,
   deleteTodo,
@@ -24,8 +25,6 @@ import {
   IconGripVertical,
   IconTagFilled,
   IconCircleCheck,
-  IconChevronDown,
-  IconBellFilled,
   IconAlarmFilled,
   IconTrash,
 } from '@tabler/icons-react'
@@ -75,16 +74,29 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
   const [editingTask, setEditingTask] = useState<Todo | null>(null)
+  const searchParams = useSearchParams()
   const [formData, setFormData] = useState<{
     title: string
     dueDate?: Date
     priority: 'High' | 'Medium' | 'Low'
-    reminder: string
+    category: 'Work' | 'Health' | 'Personal' | 'Finance' | null
+    reminderTime: string
   }>({
     title: '',
     priority: 'Medium',
-    reminder: '',
+    category: 'Work',
+    reminderTime: '',
   })
+
+  useEffect(() => {
+    const todoId = searchParams.get('id')
+    if (todoId) {
+      const todoToEdit = todos.find((todo) => todo.id === Number(todoId))
+      if (todoToEdit) {
+        openEditModal(todoToEdit)
+      }
+    }
+  }, [searchParams, todos])
 
   const generateReminderOptions = () => {
     const options = []
@@ -109,7 +121,8 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
     setFormData({
       title: '',
       priority: 'Medium',
-      reminder: '',
+      category: 'Work',
+      reminderTime: '',
     })
     setIsCreateModalOpen(true)
   }
@@ -121,7 +134,8 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
       title: task.title,
       dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
       priority: task.priority || 'Medium',
-      reminder: '',
+      category: task.category || 'Work',
+      reminderTime: task.reminderTime || '',
     })
     setIsCreateModalOpen(true)
   }
@@ -137,7 +151,9 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
         title: formData.title,
         priority: formData.priority,
         dueDate: formData.dueDate,
+        reminderTime: formData.reminderTime,
         completed: editingTask.completed,
+        category: formData.category,
       }
       startTransition(async () => {
         addOptimisticTodo({
@@ -152,9 +168,9 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
         title: formData.title,
         priority: formData.priority,
         dueDate: formData.dueDate,
+        reminderTime: formData.reminderTime,
+        category: formData.category,
         completed: false,
-        userId: '', // This will be set by the server
-        category: null,
       }
       startTransition(async () => {
         addOptimisticTodo({ type: 'add', todo: newTodo as unknown as Todo })
@@ -170,7 +186,8 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
     setFormData({
       title: '',
       priority: 'Medium',
-      reminder: '',
+      category: 'Work',
+      reminderTime: '',
     })
   }
 
@@ -181,6 +198,23 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
       case 'Medium':
         return 'text-[#ffb110]'
       case 'Low':
+        return 'text-[#2383e2]'
+      default:
+        return 'text-muted-foreground'
+    }
+  }
+
+  const getCategoryColorClass = (
+    category: 'Work' | 'Health' | 'Personal' | 'Finance' | null,
+  ) => {
+    switch (category) {
+      case 'Work':
+        return 'text-[#ffb110]'
+      case 'Health':
+        return 'text-[#de5550]'
+      case 'Personal':
+        return 'text-[#22c55e]'
+      case 'Finance':
         return 'text-[#2383e2]'
       default:
         return 'text-muted-foreground'
@@ -236,10 +270,16 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
                 />
                 {todo.priority}
               </div>
-              <div className="border-border text-muted-foreground flex items-center gap-1 text-xs">
-                <IconTagFilled className="mr-1 h-3 w-3" />
-                {todo.category}
-              </div>
+              {todo.category && (
+                <div className="border-border text-muted-foreground flex items-center gap-1 text-xs">
+                  <IconTagFilled
+                    className={`mr-1 h-3 w-3 ${getCategoryColorClass(
+                      todo.category,
+                    )}`}
+                  />
+                  {todo.category}
+                </div>
+              )}
               {todo.dueDate && (
                 <div className="text-muted-foreground flex items-center gap-1 text-xs">
                   <IconCalendarFilled className="h-3 w-3" />
@@ -248,6 +288,12 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
                     month: 'short',
                     year: 'numeric',
                   })}
+                </div>
+              )}
+              {todo.reminderTime && (
+                <div className="text-muted-foreground flex items-center gap-1 text-xs">
+                  <IconAlarmFilled className="h-3 w-3" />
+                  {todo.reminderTime}
                 </div>
               )}
             </div>
@@ -380,11 +426,56 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
                 </SelectContent>
               </Select>
 
+              <Select
+                value={formData.category || undefined}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    category: value as any,
+                  }))
+                }
+              >
+                <SelectTrigger
+                  size="sm"
+                  className="border-text-muted-foreground text-muted-foreground rounded-sm px-2 py-0 text-xs focus:ring-0 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none"
+                >
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Work" className="text-xs">
+                    <IconTagFilled
+                      className={`h-3 w-3 ${getCategoryColorClass('Work')}`}
+                    />
+                    Work
+                  </SelectItem>
+                  <SelectItem value="Health" className="text-xs">
+                    <IconTagFilled
+                      className={`h-3 w-3 ${getCategoryColorClass('Health')}`}
+                    />
+                    Health
+                  </SelectItem>
+                  <SelectItem value="Personal" className="text-xs">
+                    <IconTagFilled
+                      className={`h-3 w-3 ${getCategoryColorClass(
+                        'Personal',
+                      )}`}
+                    />
+                    Personal
+                  </SelectItem>
+                  <SelectItem value="Finance" className="text-xs">
+                    <IconTagFilled
+                      className={`h-3 w-3 ${getCategoryColorClass('Finance')}`}
+                    />
+                    Finance
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+
               <div>
                 <Select
-                  value={formData.reminder}
+                  value={formData.reminderTime}
                   onValueChange={(value: string) =>
-                    setFormData((prev) => ({ ...prev, reminder: value }))
+                    setFormData((prev) => ({ ...prev, reminderTime: value }))
                   }
                 >
                   <SelectTrigger
@@ -392,7 +483,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
                     className="border-text-muted-foreground text-muted-foreground rounded-sm px-2 py-0 text-xs focus:ring-0 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none"
                   >
                     <IconAlarmFilled className="h-3 w-3" />
-                    <SelectValue placeholder="Reminders" />
+                    <SelectValue placeholder="00:00" />
                   </SelectTrigger>
                   <SelectContent className="max-h-60">
                     {reminderOptions.map((time) => (

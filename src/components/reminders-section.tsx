@@ -1,6 +1,7 @@
 'use client'
 
-import { useOptimistic, useTransition, useState } from 'react'
+import { useOptimistic, useTransition, useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import {
   createReminder,
   deleteReminder,
@@ -36,6 +37,7 @@ import {
 } from '@tabler/icons-react'
 import TextareaAutosize from 'react-textarea-autosize'
 import { Reminder } from '@/types'
+import { formatTime } from '@/lib/utils'
 
 type ReminderForm = {
   title: string
@@ -84,6 +86,7 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
   const [isPending, startTransition] = useTransition()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingReminder, setEditingReminder] = useState<Reminder | null>(null)
+  const searchParams = useSearchParams()
 
   const [formData, setFormData] = useState<ReminderForm>({
     title: '',
@@ -92,6 +95,18 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
     repeat: 'Daily',
     category: 'Work',
   })
+
+  useEffect(() => {
+    const reminderId = searchParams.get('id')
+    if (reminderId) {
+      const reminderToEdit = reminders.find(
+        (reminder) => reminder.id === Number(reminderId),
+      )
+      if (reminderToEdit) {
+        openEditModal(reminderToEdit)
+      }
+    }
+  }, [searchParams, reminders])
 
   const generateTimeOptions = () => {
     const options = []
@@ -246,31 +261,18 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
           return (
             <Card
               key={reminder.id}
-              className="bg-card border-border hover:bg-card/80 group cursor-pointer transition-colors"
+              className="bg-card border-border hover:bg-card/80 group cursor-pointer transition-colors gap-2"
               onClick={() => openEditModal(reminder)}
             >
               <CardHeader className="px-4">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="text-foreground mb-1 text-sm font-medium">
+                    <h3 className="text-foreground mb-2 text-sm font-medium">
                       {reminder.title}
                     </h3>
                     <p className="text-muted-foreground mb-2 text-xs">
                       {reminder.description}
                     </p>
-                    <div className="text-muted-foreground flex items-center gap-2 text-xs">
-                      <IconCalendarFilled className="h-3 w-3" />
-                      <span>
-                        {reminder.date &&
-                          new Date(reminder.date).toLocaleDateString('en-GB', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric',
-                          })}
-                      </span>
-                      <IconAlarmFilled className="ml-2 h-3 w-3" />
-                      <span>{reminder.time}</span>
-                    </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <Button
@@ -297,6 +299,21 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
               </CardHeader>
               <CardContent className="px-4 pt-0">
                 <div className="flex items-center gap-4">
+                  <div className="text-muted-foreground flex items-center gap-1 text-xs">
+                      <IconCalendarFilled className="h-3 w-3" />
+                      <span>
+                        {reminder.date &&
+                          new Date(reminder.date).toLocaleDateString('en-GB', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                          })}
+                      </span>
+                  </div>
+                  <div className="text-muted-foreground flex items-center gap-1 text-xs">
+                      <IconAlarmFilled className="h-3 w-3" />
+                      <span>{formatTime(reminder.time)}</span>
+                  </div>
                   <div className="text-muted-foreground flex items-center gap-1 text-xs">
                     <IconRepeat
                       className={`h-3 w-3 ${getRepeatColorClass(reminder.repeat)}`}

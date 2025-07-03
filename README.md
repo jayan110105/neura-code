@@ -6,6 +6,16 @@
 - [x] Proper types
 - [x] Sidebar Styling
 - [x] Create Separate Files for Mock Data
+- [x] Setup Database with drizzle ORM
+- [x] Setup Auth with Better Auth
+- [x] Add Auth Flows
+- [x] Add Server Action and use Database values
+- [x] Add Optimistic Updates
+- [x] Refactor into Multi Page Navigation
+- [x] Add page navigation from today section
+- [ ] Fix Daily Log
+- [ ] Today should have today's things
+- [ ] Handle Empty States
 
 ## Notes
 

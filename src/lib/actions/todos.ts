@@ -24,6 +24,8 @@ export async function createTodo(formData: {
   title: string
   priority: 'High' | 'Medium' | 'Low'
   dueDate?: Date
+  reminderTime?: string
+  category?: 'Work' | 'Health' | 'Personal' | 'Finance' | null
 }) {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session?.user?.id) {
@@ -36,6 +38,8 @@ export async function createTodo(formData: {
       title: formData.title,
       priority: formData.priority,
       dueDate: formData.dueDate,
+      reminderTime: formData.reminderTime,
+      category: formData.category,
       userId: session.user.id,
     })
     .returning()
@@ -51,7 +55,9 @@ export async function updateTodo(
     title: string
     priority: 'High' | 'Medium' | 'Low'
     dueDate?: Date
+    reminderTime?: string
     completed?: boolean
+    category?: 'Work' | 'Health' | 'Personal' | 'Finance' | null
   },
 ) {
   const session = await auth.api.getSession({ headers: await headers() })
@@ -65,7 +71,9 @@ export async function updateTodo(
       title: formData.title,
       priority: formData.priority,
       dueDate: formData.dueDate,
+      reminderTime: formData.reminderTime,
       completed: formData.completed,
+      category: formData.category,
     })
     .where(and(eq(todos.id, id), eq(todos.userId, session.user.id)))
     .returning()
