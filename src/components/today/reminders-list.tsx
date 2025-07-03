@@ -1,8 +1,14 @@
 'use client'
 
 import { Card, CardContent } from '@/components/ui/card'
-import { IconAlarmFilled, IconRepeat, IconTagFilled } from '@tabler/icons-react'
+import {
+  IconAlarmFilled,
+  IconRepeat,
+  IconTagFilled,
+  IconCalendarFilled,
+} from '@tabler/icons-react'
 import { Reminder } from '@/types'
+import { formatTime } from '@/lib/utils'
 
 interface RemindersListProps {
   reminders: Reminder[]
@@ -71,10 +77,25 @@ export function RemindersList({
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
+                      {reminder.date && (
+                        <div className="text-muted-foreground flex items-center gap-1 text-xs">
+                          <IconCalendarFilled className="h-3 w-3" />
+                          <span>
+                            {new Date(reminder.date).toLocaleDateString(
+                              'en-GB',
+                              {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric',
+                              },
+                            )}
+                          </span>
+                        </div>
+                      )}
                       {reminder.time && (
                         <div className="text-muted-foreground flex items-center gap-1 text-xs">
                           <IconAlarmFilled className="h-3 w-3" />
-                          <span>{reminder.time}</span>
+                          <span>{formatTime(reminder.time)}</span>
                         </div>
                       )}
                       {reminder.repeat && reminder.repeat !== 'None' && (

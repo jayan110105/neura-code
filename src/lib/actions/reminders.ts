@@ -6,8 +6,9 @@ import { auth } from '@/lib/auth'
 import { eq, and } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
+import { Reminder } from '@/types'
 
-export async function getReminders() {
+export async function getReminders(): Promise<Reminder[]> {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session?.user?.id) {
     return []
@@ -17,14 +18,17 @@ export async function getReminders() {
     orderBy: (reminders, { desc }) => [desc(reminders.id)],
   })
 
-  return userReminders
+  return userReminders.map((reminder) => ({
+    ...reminder,
+    date: reminder.date ? new Date(reminder.date) : null,
+  }))
 }
 
 export async function createReminder(formData: {
   title: string
   description: string | null
   time: string | null
-  date: string | null
+  date: Date | null
   repeat: 'Daily' | 'Weekly' | 'Monthly' | 'None' | null
   category: 'Work' | 'Health' | 'Personal' | 'Finance' | null
 }) {
@@ -37,13 +41,17 @@ export async function createReminder(formData: {
     .insert(reminders)
     .values({
       ...formData,
+      date: formData.date ? formData.date.toISOString().split('T')[0] : null,
       userId: session.user.id,
     })
     .returning()
 
   revalidatePath('/')
   revalidatePath('/reminders')
-  return newReminder
+  return {
+    ...newReminder,
+    date: newReminder.date ? new Date(newReminder.date) : null,
+  }
 }
 
 export async function updateReminder(
@@ -52,7 +60,7 @@ export async function updateReminder(
     title: string
     description: string | null
     time: string | null
-    date: string | null
+    date: Date | null
     repeat: 'Daily' | 'Weekly' | 'Monthly' | 'None' | null
     category: 'Work' | 'Health' | 'Personal' | 'Finance' | null
   },
@@ -66,13 +74,17 @@ export async function updateReminder(
     .update(reminders)
     .set({
       ...formData,
+      date: formData.date ? formData.date.toISOString().split('T')[0] : null,
     })
     .where(and(eq(reminders.id, id), eq(reminders.userId, session.user.id)))
     .returning()
 
   revalidatePath('/')
   revalidatePath('/reminders')
-  return updatedReminder
+  return {
+    ...updatedReminder,
+    date: updatedReminder.date ? new Date(updatedReminder.date) : null,
+  }
 }
 
 export async function toggleReminder(id: number, enabled: boolean) {
@@ -89,7 +101,10 @@ export async function toggleReminder(id: number, enabled: boolean) {
 
   revalidatePath('/')
   revalidatePath('/reminders')
-  return toggledReminder
+  return {
+    ...toggledReminder,
+    date: toggledReminder.date ? new Date(toggledReminder.date) : null,
+  }
 }
 
 export async function deleteReminder(id: number) {

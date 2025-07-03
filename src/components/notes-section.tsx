@@ -128,35 +128,50 @@ export function NotesSection({ notes }: { notes: Note[] }) {
       </div>
 
       <div className="grid grid-cols-1 gap-4 space-y-3 md:grid-cols-2 lg:grid-cols-3">
-        {optimisticNotes.map((note) => (
-          <Card
-            key={note.id}
-            className="bg-card group h-72 cursor-pointer border-none transition-shadow hover:shadow-md gap-2"
-            onClick={() => handleEditNote(note)}
-          >
-            <CardHeader className="flex items-start justify-between gap-2">
-              <h3 className="text-foreground line-clamp-2 min-w-0 flex-1 text-lg font-medium">
-                {note.title}
-              </h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground hover:text-destructive shrink-0 p-0 opacity-0 transition-opacity group-hover:opacity-100"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleDeleteNote(note.id)
-                }}
-              >
-                <IconTrash className="h-4 w-4" />
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground line-clamp-6 text-sm leading-relaxed">
-                {note.content}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
+        {optimisticNotes.length > 0 ? (
+          optimisticNotes.map((note) => (
+            <Card
+              key={note.id}
+              className="bg-card group h-72 cursor-pointer border-none transition-shadow hover:shadow-md gap-2"
+              onClick={() => handleEditNote(note)}
+            >
+              <CardHeader className="flex items-start justify-between gap-2">
+                <h3 className="text-foreground line-clamp-2 min-w-0 flex-1 text-lg font-medium">
+                  {note.title}
+                </h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground hover:text-destructive shrink-0 p-0 opacity-0 transition-opacity group-hover:opacity-100"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleDeleteNote(note.id)
+                  }}
+                >
+                  <IconTrash className="h-4 w-4" />
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground line-clamp-6 text-sm leading-relaxed">
+                  {note.content}
+                </p>
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <div className="col-span-full flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted bg-card p-12 text-center">
+            <h3 className="text-xl font-semibold tracking-tight">
+              No notes found
+            </h3>
+            <p className="text-muted-foreground mt-2 mb-4 text-sm">
+              You haven&apos;t created any notes yet.
+            </p>
+            <Button variant="outline" onClick={handleNewNote}>
+              <IconPlus className="mr-2 h-4 w-4" />
+              Create Note
+            </Button>
+          </div>
+        )}
       </div>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>

@@ -139,7 +139,7 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
     setFormData({
       title: reminder.title,
       description: reminder.description || '',
-      time: reminder.time || '9:00 AM',
+      time: reminder.time ? formatTime(reminder.time) : '9:00 AM',
       date: reminder.date ? new Date(reminder.date) : undefined,
       repeat: reminder.repeat,
       category: reminder.category,
@@ -152,6 +152,18 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
     setEditingReminder(null)
   }
 
+  const to24HourFormat = (time: string | null): string | null => {
+    if (!time) return null
+    const [hourMinute, period] = time.split(' ')
+    let [hour, minute] = hourMinute.split(':').map(Number)
+    if (period.toLowerCase() === 'pm' && hour !== 12) {
+      hour += 12
+    } else if (period.toLowerCase() === 'am' && hour === 12) {
+      hour = 0
+    }
+    return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00`
+  }
+
   const handleSaveReminder = async () => {
     if (!formData.title.trim()) return
 
@@ -159,7 +171,8 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
 
     const dataToSave = {
       ...formData,
-      date: formData.date ? format(formData.date, 'yyyy-MM-dd') : null,
+      time: to24HourFormat(formData.time),
+      date: formData.date || null,
     }
 
     if (editingReminder) {
@@ -257,49 +270,50 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
       </div>
 
       <div className="grid gap-3 md:grid-cols-2">
-        {optimisticReminders.map((reminder) => {
-          return (
-            <Card
-              key={reminder.id}
-              className="bg-card border-border hover:bg-card/80 group cursor-pointer transition-colors gap-2"
-              onClick={() => openEditModal(reminder)}
-            >
-              <CardHeader className="px-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-foreground mb-2 text-sm font-medium">
-                      {reminder.title}
-                    </h3>
-                    <p className="text-muted-foreground mb-2 text-xs">
-                      {reminder.description}
-                    </p>
+        {optimisticReminders.length > 0 ? (
+          optimisticReminders.map((reminder) => {
+            return (
+              <Card
+                key={reminder.id}
+                className="bg-card border-border hover:bg-card/80 group cursor-pointer transition-colors gap-2"
+                onClick={() => openEditModal(reminder)}
+              >
+                <CardHeader className="px-4">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="text-foreground mb-2 text-sm font-medium">
+                        {reminder.title}
+                      </h3>
+                      <p className="text-muted-foreground mb-2 text-xs">
+                        {reminder.description}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-muted-foreground hover:text-destructive h-auto p-1 opacity-0 transition-opacity group-hover:opacity-100"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDeleteReminder(reminder.id)
+                        }}
+                      >
+                        <IconTrash className="h-3 w-3" />
+                      </Button>
+                      <Switch
+                        checked={reminder.enabled}
+                        onCheckedChange={() =>
+                          handleToggleReminder(reminder.id, reminder.enabled)
+                        }
+                        onClick={(e) => e.stopPropagation()}
+                        className="data-[state=checked]:bg-primary"
+                      />
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-muted-foreground hover:text-destructive h-auto p-1 opacity-0 transition-opacity group-hover:opacity-100"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleDeleteReminder(reminder.id)
-                      }}
-                    >
-                      <IconTrash className="h-3 w-3" />
-                    </Button>
-                    <Switch
-                      checked={reminder.enabled}
-                      onCheckedChange={() =>
-                        handleToggleReminder(reminder.id, reminder.enabled)
-                      }
-                      onClick={(e) => e.stopPropagation()}
-                      className="data-[state=checked]:bg-primary"
-                    />
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="px-4 pt-0">
-                <div className="flex items-center gap-4">
-                  <div className="text-muted-foreground flex items-center gap-1 text-xs">
+                </CardHeader>
+                <CardContent className="px-4 pt-0">
+                  <div className="flex items-center gap-4">
+                    <div className="text-muted-foreground flex items-center gap-1 text-xs">
                       <IconCalendarFilled className="h-3 w-3" />
                       <span>
                         {reminder.date &&
@@ -309,28 +323,42 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
                             year: 'numeric',
                           })}
                       </span>
-                  </div>
-                  <div className="text-muted-foreground flex items-center gap-1 text-xs">
+                    </div>
+                    <div className="text-muted-foreground flex items-center gap-1 text-xs">
                       <IconAlarmFilled className="h-3 w-3" />
                       <span>{formatTime(reminder.time)}</span>
+                    </div>
+                    <div className="text-muted-foreground flex items-center gap-1 text-xs">
+                      <IconRepeat
+                        className={`h-3 w-3 ${getRepeatColorClass(reminder.repeat)}`}
+                      />
+                      {reminder.repeat}
+                    </div>
+                    <div className="text-muted-foreground flex items-center gap-1 text-xs">
+                      <IconTagFilled
+                        className={`h-3 w-3 ${getCategoryColorClass(reminder.category)}`}
+                      />
+                      {reminder.category}
+                    </div>
                   </div>
-                  <div className="text-muted-foreground flex items-center gap-1 text-xs">
-                    <IconRepeat
-                      className={`h-3 w-3 ${getRepeatColorClass(reminder.repeat)}`}
-                    />
-                    {reminder.repeat}
-                  </div>
-                  <div className="text-muted-foreground flex items-center gap-1 text-xs">
-                    <IconTagFilled
-                      className={`h-3 w-3 ${getCategoryColorClass(reminder.category)}`}
-                    />
-                    {reminder.category}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )
-        })}
+                </CardContent>
+              </Card>
+            )
+          })
+        ) : (
+          <div className="col-span-full flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted bg-card p-12 text-center">
+            <h3 className="text-xl font-semibold tracking-tight">
+              No reminders found
+            </h3>
+            <p className="text-muted-foreground mt-2 mb-4 text-sm">
+              You haven&apos;t set any reminders yet.
+            </p>
+            <Button variant="outline" onClick={openCreateModal}>
+              <IconPlus className="mr-2 h-4 w-4" />
+              New Reminder
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Modal for create & edit */}

@@ -181,70 +181,85 @@ export function BookmarksSection({ bookmarks }: { bookmarks: Bookmark[] }) {
       </div>
 
       <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-        {optimisticBookmarks.map((bookmark) => (
-          <Card
-            key={bookmark.id}
-            className="bg-card border-card hover:bg-card/80 group cursor-pointer transition-colors gap-2"
-            onClick={() => openEditModal(bookmark)}
-          >
-            <CardHeader className="px-4">
-              <div className="flex items-start gap-3">
-                <div className="min-w-0 flex-1">
-                  <h3 className="text-foreground mb-2 line-clamp-2 text-sm leading-tight font-medium">
-                    {bookmark.title}
-                  </h3>
-                  <div className="text-muted-foreground flex items-center gap-2 text-xs">
-                    <IconWorld className="h-3 w-3" />
-                    <span className="truncate">
-                      {new URL(bookmark.url).hostname}
-                    </span>
+        {optimisticBookmarks.length > 0 ? (
+          optimisticBookmarks.map((bookmark) => (
+            <Card
+              key={bookmark.id}
+              className="bg-card border-card hover:bg-card/80 group cursor-pointer transition-colors gap-2"
+              onClick={() => openEditModal(bookmark)}
+            >
+              <CardHeader className="px-4">
+                <div className="flex items-start gap-3">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-foreground mb-2 line-clamp-2 text-sm leading-tight font-medium">
+                      {bookmark.title}
+                    </h3>
+                    <div className="text-muted-foreground flex items-center gap-2 text-xs">
+                      <IconWorld className="h-3 w-3" />
+                      <span className="truncate">
+                        {new URL(bookmark.url).hostname}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-muted-foreground hover:text-destructive h-auto p-1 opacity-0 transition-opacity group-hover:opacity-100"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleDeleteBookmark(bookmark.id)
+                      }}
+                    >
+                      <IconTrash className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-muted-foreground hover:text-foreground h-auto p-1 opacity-0 transition-opacity group-hover:opacity-100"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        window.open(bookmark.url, '_blank')
+                      }}
+                    >
+                      <IconExternalLink className="h-3 w-3" />
+                    </Button>
                   </div>
                 </div>
-                <div className="flex gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-muted-foreground hover:text-destructive h-auto p-1 opacity-0 transition-opacity group-hover:opacity-100"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleDeleteBookmark(bookmark.id)
-                    }}
-                  >
-                    <IconTrash className="h-3 w-3" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-muted-foreground hover:text-foreground h-auto p-1 opacity-0 transition-opacity group-hover:opacity-100"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      window.open(bookmark.url, '_blank')
-                    }}
-                  >
-                    <IconExternalLink className="h-3 w-3" />
-                  </Button>
+              </CardHeader>
+              <CardContent className="px-4 pt-0">
+                <p className="text-muted-foreground mb-3 line-clamp-2 text-xs">
+                  {bookmark.description}
+                </p>
+                <div className="flex flex-wrap gap-1">
+                  {bookmark.tags?.map((tag) => (
+                    <Badge
+                      key={tag}
+                      variant="outline"
+                      className="border-border text-muted-foreground h-7 rounded-sm bg-transparent text-xs"
+                    >
+                      <IconTagFilled className="mr-1 h-2 w-2" />
+                      {tag}
+                    </Badge>
+                  ))}
                 </div>
-              </div>
-            </CardHeader>
-            <CardContent className="px-4 pt-0">
-              <p className="text-muted-foreground mb-3 line-clamp-2 text-xs">
-                {bookmark.description}
-              </p>
-              <div className="flex flex-wrap gap-1">
-                {bookmark.tags?.map((tag) => (
-                  <Badge
-                    key={tag}
-                    variant="outline"
-                    className="border-border text-muted-foreground h-7 rounded-sm bg-transparent text-xs"
-                  >
-                    <IconTagFilled className="mr-1 h-2 w-2" />
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <div className="col-span-full flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted bg-card p-12 text-center">
+            <h3 className="text-xl font-semibold tracking-tight">
+              No bookmarks found
+            </h3>
+            <p className="text-muted-foreground mt-2 mb-4 text-sm">
+              You haven&apos;t saved any bookmarks yet.
+            </p>
+            <Button variant="outline" onClick={openCreateModal}>
+              <IconPlus className="mr-2 h-4 w-4" />
+              Add Bookmark
+            </Button>
+          </div>
+        )}
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -272,8 +287,26 @@ export function BookmarksSection({ bookmarks }: { bookmarks: Bookmark[] }) {
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, url: e.target.value }))
                 }
-                className="placeholder:text-muted-foreground w-full bg-transparent p-2 outline-none"
+                className="placeholder:text-muted-foreground flex-1 bg-transparent p-2 outline-none"
               />
+              {isEditMode && formData.url && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground hover:text-foreground h-auto p-1"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    try {
+                      new URL(formData.url)
+                      window.open(formData.url, '_blank')
+                    } catch {
+                      toast.error('Invalid URL')
+                    }
+                  }}
+                >
+                  <IconExternalLink className="h-4 w-4" />
+                </Button>
+              )}
             </div>
             <TextareaAutosize
               placeholder="Description"

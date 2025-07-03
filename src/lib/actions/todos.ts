@@ -38,7 +38,7 @@ export async function createTodo(formData: {
       title: formData.title,
       priority: formData.priority,
       dueDate: formData.dueDate,
-      reminderTime: formData.reminderTime,
+      reminderTime: formData.reminderTime || null,
       category: formData.category,
       userId: session.user.id,
     })
@@ -71,7 +71,7 @@ export async function updateTodo(
       title: formData.title,
       priority: formData.priority,
       dueDate: formData.dueDate,
-      reminderTime: formData.reminderTime,
+      reminderTime: formData.reminderTime || null,
       completed: formData.completed,
       category: formData.category,
     })

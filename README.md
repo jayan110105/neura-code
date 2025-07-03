@@ -13,9 +13,9 @@
 - [x] Add Optimistic Updates
 - [x] Refactor into Multi Page Navigation
 - [x] Add page navigation from today section
+- [x] Today should have today's things
+- [x] Handle Empty States
 - [ ] Fix Daily Log
-- [ ] Today should have today's things
-- [ ] Handle Empty States
 
 ## Notes
 
