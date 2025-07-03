@@ -26,7 +26,8 @@ import {
   IconLogout,
 } from '@tabler/icons-react'
 import { authClient } from '@/lib/auth-client'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
+import Link from 'next/link'
 
 const menuItems = [
   {
@@ -34,49 +35,48 @@ const menuItems = [
     title: 'Search',
     icon: IconSearch,
     iconFilled: IconSearch,
+    href: '#',
   },
   {
     id: 'today',
     title: 'Today',
     icon: IconCalendar,
     iconFilled: IconCalendarFilled,
+    href: '/today',
   },
   {
     id: 'notes',
     title: 'Notes',
     icon: IconFileText,
     iconFilled: IconFileTextFilled,
+    href: '/notes',
   },
   {
     id: 'bookmarks',
     title: 'Bookmarks',
     icon: IconBookmark,
     iconFilled: IconBookmarkFilled,
+    href: '/bookmarks',
   },
   {
-    id: 'todo',
+    id: 'todos',
     title: 'Todo',
     icon: IconCopyCheck,
     iconFilled: IconCopyCheckFilled,
+    href: '/todos',
   },
   {
     id: 'reminders',
     title: 'Reminders',
     icon: IconAlarm,
     iconFilled: IconAlarmFilled,
+    href: '/reminders',
   },
 ]
 
-interface AppSidebarProps {
-  activeSection: string
-  setActiveSection: (section: string) => void
-}
-
-export function AppSidebar({
-  activeSection,
-  setActiveSection,
-}: AppSidebarProps) {
+export function AppSidebar() {
   const router = useRouter()
+  const pathname = usePathname()
 
   const handleSignOut = async () => {
     await authClient.signOut({
@@ -105,22 +105,33 @@ export function AppSidebar({
       <SidebarContent className="px-3 py-1">
         <SidebarMenu>
           {menuItems.map((item) => {
-            const IconComponent =
-              activeSection === item.id ? item.iconFilled : item.icon
+            const isActive = pathname === item.href
+            const IconComponent = isActive ? item.iconFilled : item.icon
+
+            const button = (
+              <SidebarMenuButton
+                isActive={isActive}
+                className={`!h-9 w-full justify-start gap-3 rounded-sm px-3 text-sm font-medium transition-all duration-150 ${
+                  isActive
+                    ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                    : 'text-muted-foreground hover:bg-sidebar-accent'
+                }`}
+                {...(item.id === 'search' ? { onClick: () => {} } : {})}
+              >
+                <IconComponent className="!size-6" />
+                <span>{item.title}</span>
+              </SidebarMenuButton>
+            )
+
             return (
               <SidebarMenuItem key={item.id}>
-                <SidebarMenuButton
-                  onClick={() => setActiveSection(item.id)}
-                  isActive={activeSection === item.id}
-                  className={`!h-9 w-full justify-start gap-3 rounded-sm px-3 text-sm font-medium transition-all duration-150 ${
-                    activeSection === item.id
-                      ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                      : 'text-muted-foreground hover:bg-sidebar-accent'
-                  }`}
-                >
-                  <IconComponent className="!size-6" />
-                  <span>{item.title}</span>
-                </SidebarMenuButton>
+                {item.id === 'search' ? (
+                  button
+                ) : (
+                  <Link href={item.href} passHref>
+                    {button}
+                  </Link>
+                )}
               </SidebarMenuItem>
             )
           })}
