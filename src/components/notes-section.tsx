@@ -43,7 +43,7 @@ export function NotesSection({ notes }: { notes: Note[] }) {
     notes,
     optimisticReducer,
   )
-  const [isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
   const [editingNote, setEditingNote] = useState<Note | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [editForm, setEditForm] = useState({ title: '', content: '' })

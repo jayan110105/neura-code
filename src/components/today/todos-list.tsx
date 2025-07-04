@@ -29,7 +29,7 @@ export function TodosList({ todos, onTodoClick }: TodosListProps) {
     todos,
     optimisticReducer,
   )
-  const [isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
 
   if (optimisticTodos.length === 0) return null
 

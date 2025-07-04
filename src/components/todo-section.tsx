@@ -69,7 +69,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
     todos,
     optimisticReducer,
   )
-  const [isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
@@ -171,9 +171,11 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
         reminderTime: formData.reminderTime,
         category: formData.category,
         completed: false,
+        userId: '',
+        timestamp: new Date().toISOString(),
       }
       startTransition(async () => {
-        addOptimisticTodo({ type: 'add', todo: newTodo as unknown as Todo })
+        addOptimisticTodo({ type: 'add', todo: newTodo as Todo })
         await createTodo(formData)
       })
     }
@@ -431,7 +433,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
                 onValueChange={(value) =>
                   setFormData((prev) => ({
                     ...prev,
-                    category: value as any,
+                    category: value as 'Work' | 'Health' | 'Personal' | 'Finance' | null,
                   }))
                 }
               >

@@ -65,7 +65,7 @@ export function BookmarksSection({ bookmarks }: { bookmarks: Bookmark[] }) {
     bookmarks,
     optimisticReducer,
   )
-  const [isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingBookmark, setEditingBookmark] = useState<Bookmark | null>(null)
   const searchParams = useSearchParams()

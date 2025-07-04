@@ -62,7 +62,7 @@ export function RemindersList({
       <Card className="bg-card border-none">
         <CardContent className="px-4">
           <div className="space-y-2">
-            {reminders.map((reminder, index) => (
+            {reminders.map((reminder) => (
               <div
                 key={reminder.id}
                 className={`hover:bg-muted/50 flex cursor-pointer items-start justify-between rounded-md p-2 transition-colors`}

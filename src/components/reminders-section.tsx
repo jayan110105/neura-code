@@ -8,7 +8,6 @@ import {
   toggleReminder,
   updateReminder,
 } from '@/lib/actions/reminders'
-import { format } from 'date-fns'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
@@ -83,7 +82,7 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
     reminders,
     optimisticReducer,
   )
-  const [isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingReminder, setEditingReminder] = useState<Reminder | null>(null)
   const searchParams = useSearchParams()
@@ -111,7 +110,7 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
   const generateTimeOptions = () => {
     const options = []
     for (let hour = 0; hour < 24; hour++) {
-      for (let minute = 0; minute < 60; minute += 15) {
+      for (const minute of [0, 15, 30, 45]) {
         const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
         const ampm = hour < 12 ? 'AM' : 'PM'
         const timeString = `${hour12}:${minute.toString().padStart(2, '0')} ${ampm}`
@@ -155,7 +154,8 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
   const to24HourFormat = (time: string | null): string | null => {
     if (!time) return null
     const [hourMinute, period] = time.split(' ')
-    let [hour, minute] = hourMinute.split(':').map(Number)
+    const [parsedHour, minute] = hourMinute.split(':').map(Number)
+    let hour = parsedHour
     if (period.toLowerCase() === 'pm' && hour !== 12) {
       hour += 12
     } else if (period.toLowerCase() === 'am' && hour === 12) {
@@ -181,7 +181,10 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
         ...dataToSave,
       }
       startTransition(async () => {
-        addOptimisticReminder({ type: 'update', reminder: updatedReminder as Reminder })
+        addOptimisticReminder({
+          type: 'update',
+          reminder: updatedReminder as Reminder,
+        })
         await updateReminder(editingReminder.id, dataToSave)
       })
     } else {
@@ -193,7 +196,10 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
         timestamp: new Date().toISOString(),
       }
       startTransition(async () => {
-        addOptimisticReminder({ type: 'add', reminder: newReminder as unknown as Reminder })
+        addOptimisticReminder({
+          type: 'add',
+          reminder: newReminder as unknown as Reminder,
+        })
         await createReminder(dataToSave)
       })
     }
@@ -422,7 +428,15 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
               <Select
                 value={formData.repeat || undefined}
                 onValueChange={(value) =>
-                  setFormData((prev) => ({ ...prev, repeat: value as any }))
+                  setFormData((prev) => ({
+                    ...prev,
+                    repeat: value as
+                      | 'Daily'
+                      | 'Weekly'
+                      | 'Monthly'
+                      | 'None'
+                      | null,
+                  }))
                 }
               >
                 <SelectTrigger
@@ -458,7 +472,15 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
               <Select
                 value={formData.category || undefined}
                 onValueChange={(value) =>
-                  setFormData((prev) => ({ ...prev, category: value as any }))
+                  setFormData((prev) => ({
+                    ...prev,
+                    category: value as
+                      | 'Work'
+                      | 'Health'
+                      | 'Personal'
+                      | 'Finance'
+                      | null,
+                  }))
                 }
               >
                 <SelectTrigger
