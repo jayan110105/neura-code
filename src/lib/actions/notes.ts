@@ -2,26 +2,29 @@
 
 import { db } from '@/db'
 import { notes } from '@/db/schema'
-import { auth } from '@/lib/auth'
 import { eq, and } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
-import { headers } from 'next/headers'
+import { cache } from 'react'
+import { getCachedSession } from '../session'
+
+export const getCachedNotes = cache(async (userId: string) => {
+  const userNotes = await db.query.notes.findMany({
+    where: eq(notes.userId, userId),
+    orderBy: (notes, { desc }) => [desc(notes.timestamp)],
+  })
+  return userNotes
+})
 
 export async function getNotes() {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getCachedSession()
   if (!session?.user?.id) {
     return []
   }
-  const userNotes = await db.query.notes.findMany({
-    where: eq(notes.userId, session.user.id),
-    orderBy: (notes, { desc }) => [desc(notes.timestamp)],
-  })
-
-  return userNotes
+  return getCachedNotes(session.user.id)
 }
 
 export async function createNote(formData: { title: string; content: string }) {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getCachedSession()
   if (!session?.user?.id) {
     throw new Error('Not authenticated')
   }
@@ -47,7 +50,7 @@ export async function updateNote(
     content: string
   },
 ) {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getCachedSession()
   if (!session?.user?.id) {
     throw new Error('Not authenticated')
   }
@@ -67,7 +70,7 @@ export async function updateNote(
 }
 
 export async function deleteNote(id: number) {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getCachedSession()
   if (!session?.user?.id) {
     throw new Error('Not authenticated')
   }

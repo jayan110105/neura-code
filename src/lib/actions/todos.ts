@@ -2,22 +2,25 @@
 
 import { db } from '@/db'
 import { todos } from '@/db/schema'
-import { auth } from '@/lib/auth'
 import { eq, and } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
-import { headers } from 'next/headers'
+import { cache } from 'react'
+import { getCachedSession } from '../session'
+
+export const getCachedTodos = cache(async (userId: string) => {
+  const userTodos = await db.query.todos.findMany({
+    where: eq(todos.userId, userId),
+    orderBy: (todos, { desc }) => [desc(todos.id)],
+  })
+  return userTodos
+})
 
 export async function getTodos() {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getCachedSession()
   if (!session?.user?.id) {
     return []
   }
-  const userTodos = await db.query.todos.findMany({
-    where: eq(todos.userId, session.user.id),
-    orderBy: (todos, { desc }) => [desc(todos.id)],
-  })
-
-  return userTodos
+  return getCachedTodos(session.user.id)
 }
 
 export async function createTodo(formData: {
@@ -27,7 +30,7 @@ export async function createTodo(formData: {
   reminderTime?: string
   category?: 'Work' | 'Health' | 'Personal' | 'Finance' | null
 }) {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getCachedSession()
   if (!session?.user?.id) {
     throw new Error('Not authenticated')
   }
@@ -60,7 +63,7 @@ export async function updateTodo(
     category?: 'Work' | 'Health' | 'Personal' | 'Finance' | null
   },
 ) {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getCachedSession()
   if (!session?.user?.id) {
     throw new Error('Not authenticated')
   }
@@ -84,7 +87,7 @@ export async function updateTodo(
 }
 
 export async function toggleTodo(id: number, completed: boolean) {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getCachedSession()
   if (!session?.user?.id) {
     throw new Error('Not authenticated')
   }
@@ -101,7 +104,7 @@ export async function toggleTodo(id: number, completed: boolean) {
 }
 
 export async function deleteTodo(id: number) {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getCachedSession()
   if (!session?.user?.id) {
     throw new Error('Not authenticated')
   }

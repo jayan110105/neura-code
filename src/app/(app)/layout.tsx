@@ -10,13 +10,13 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode
 }) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  })
+  // const session = await auth.api.getSession({
+  //   headers: await headers(),
+  // })
 
-  if (!session?.user) {
-    return redirect('/sign-in')
-  }
+  // if (!session?.user) {
+  //   return redirect('/sign-in')
+  // }
 
   return (
     <div className="min-h-screen">

@@ -2,22 +2,26 @@
 
 import { db } from '@/db'
 import { bookmarks } from '@/db/schema'
-import { auth } from '@/lib/auth'
 import { eq, and } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
-import { headers } from 'next/headers'
+import { cache } from 'react'
+import { getCachedSession } from '../session'
 
-export async function getBookmarks() {
-  const session = await auth.api.getSession({ headers: await headers() })
-  if (!session?.user?.id) {
-    return []
-  }
+export const getCachedBookmarks = cache(async (userId: string) => {
   const userBookmarks = await db.query.bookmarks.findMany({
-    where: eq(bookmarks.userId, session.user.id),
+    where: eq(bookmarks.userId, userId),
     orderBy: (bookmarks, { desc }) => [desc(bookmarks.timestamp)],
   })
 
   return userBookmarks
+})
+
+export async function getBookmarks() {
+  const session = await getCachedSession()
+  if (!session?.user?.id) {
+    return []
+  }
+  return getCachedBookmarks(session.user.id)
 }
 
 export async function createBookmark(formData: {
@@ -26,7 +30,7 @@ export async function createBookmark(formData: {
   description: string | null
   tags: string[] | null
 }) {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getCachedSession()
   if (!session?.user?.id) {
     throw new Error('Not authenticated')
   }
@@ -53,7 +57,7 @@ export async function updateBookmark(
     tags: string[] | null
   },
 ) {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getCachedSession()
   if (!session?.user?.id) {
     throw new Error('Not authenticated')
   }
@@ -72,7 +76,7 @@ export async function updateBookmark(
 }
 
 export async function deleteBookmark(id: number) {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getCachedSession()
   if (!session?.user?.id) {
     throw new Error('Not authenticated')
   }

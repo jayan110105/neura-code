@@ -2,19 +2,15 @@
 
 import { db } from '@/db'
 import { reminders } from '@/db/schema'
-import { auth } from '@/lib/auth'
 import { eq, and } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
-import { headers } from 'next/headers'
 import { Reminder } from '@/types'
+import { cache } from 'react'
+import { getCachedSession } from '../session'
 
-export async function getReminders(): Promise<Reminder[]> {
-  const session = await auth.api.getSession({ headers: await headers() })
-  if (!session?.user?.id) {
-    return []
-  }
+export const getCachedReminders = cache(async (userId: string): Promise<Reminder[]> => {
   const userReminders = await db.query.reminders.findMany({
-    where: eq(reminders.userId, session.user.id),
+    where: eq(reminders.userId, userId),
     orderBy: (reminders, { desc }) => [desc(reminders.id)],
   })
 
@@ -22,6 +18,14 @@ export async function getReminders(): Promise<Reminder[]> {
     ...reminder,
     date: reminder.date ? new Date(reminder.date) : null,
   }))
+})
+
+export async function getReminders(): Promise<Reminder[]> {
+  const session = await getCachedSession()
+  if (!session?.user?.id) {
+    return []
+  }
+  return getCachedReminders(session.user.id)
 }
 
 export async function createReminder(formData: {
@@ -32,7 +36,7 @@ export async function createReminder(formData: {
   repeat: 'Daily' | 'Weekly' | 'Monthly' | 'None' | null
   category: 'Work' | 'Health' | 'Personal' | 'Finance' | null
 }) {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getCachedSession()
   if (!session?.user?.id) {
     throw new Error('Not authenticated')
   }
@@ -65,7 +69,7 @@ export async function updateReminder(
     category: 'Work' | 'Health' | 'Personal' | 'Finance' | null
   },
 ) {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getCachedSession()
   if (!session?.user?.id) {
     throw new Error('Not authenticated')
   }
@@ -88,7 +92,7 @@ export async function updateReminder(
 }
 
 export async function toggleReminder(id: number, enabled: boolean) {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getCachedSession()
   if (!session?.user?.id) {
     throw new Error('Not authenticated')
   }
@@ -108,7 +112,7 @@ export async function toggleReminder(id: number, enabled: boolean) {
 }
 
 export async function deleteReminder(id: number) {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getCachedSession()
   if (!session?.user?.id) {
     throw new Error('Not authenticated')
   }
