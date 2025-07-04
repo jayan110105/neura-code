@@ -224,7 +224,7 @@ export default function PrivacyPolicyPage() {
                   href="mailto:support@neuracode.app"
                   className="font-medium text-primary underline-offset-4 hover:underline"
                 >
-                  support@neuracode.app
+                  jayan110105@gmail.com
                 </a>
                 .
               </p>
