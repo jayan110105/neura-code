@@ -84,3 +84,22 @@ export async function deleteNote(id: number) {
   revalidatePath('/notes')
   return deletedNote
 }
+
+export async function createNoteFromAgent(
+  userId: string,
+  title: string,
+  content: string,
+) {
+  const [newNote] = await db
+    .insert(notes)
+    .values({
+      userId,
+      title,
+      content,
+    })
+    .returning()
+
+  revalidatePath('/')
+  revalidatePath('/notes')
+  return newNote
+}

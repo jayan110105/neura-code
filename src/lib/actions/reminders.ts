@@ -126,3 +126,28 @@ export async function deleteReminder(id: number) {
   revalidatePath('/reminders')
   return deletedReminder
 }
+
+export async function createReminderFromAgent(
+  userId: string,
+  title: string,
+  date: string,
+  time: string,
+) {
+  const [newReminder] = await db
+    .insert(reminders)
+    .values({
+      userId,
+      title,
+      date,
+      time,
+      repeat: 'None',
+    })
+    .returning()
+
+  revalidatePath('/')
+  revalidatePath('/reminders')
+  return {
+    ...newReminder,
+    date: newReminder.date ? new Date(newReminder.date) : null,
+  }
+}

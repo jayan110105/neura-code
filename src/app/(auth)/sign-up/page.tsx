@@ -15,6 +15,7 @@ export default function SignUpPage() {
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -28,6 +29,7 @@ export default function SignUpPage() {
         name: `${firstName} ${lastName}`,
         email,
         password,
+        phoneNumber,
       })
 
       if (result.error) {
@@ -86,6 +88,19 @@ export default function SignUpPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={isLoading}
+              className="focus-visible:ring-0 focus-visible:ring-offset-0"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="phone-number">Phone Number</Label>
+            <Input
+              id="phone-number"
+              name="phone-number"
+              placeholder="+1234567890"
+              required
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
               disabled={isLoading}
               className="focus-visible:ring-0 focus-visible:ring-offset-0"
             />

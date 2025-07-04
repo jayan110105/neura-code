@@ -90,3 +90,22 @@ export async function deleteBookmark(id: number) {
   revalidatePath('/bookmarks')
   return deletedBookmark
 }
+
+export async function createBookmarkFromAgent(
+  userId: string,
+  title: string,
+  url: string,
+) {
+  const [newBookmark] = await db
+    .insert(bookmarks)
+    .values({
+      userId,
+      title,
+      url,
+    })
+    .returning()
+
+  revalidatePath('/')
+  revalidatePath('/bookmarks')
+  return newBookmark
+}

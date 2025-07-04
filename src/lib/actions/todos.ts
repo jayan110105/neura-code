@@ -118,3 +118,23 @@ export async function deleteTodo(id: number) {
   revalidatePath('/todo')
   return deletedTodo
 }
+
+export async function createTodoFromAgent(
+  userId: string,
+  title: string,
+  dueDate?: string,
+) {
+  const [newTodo] = await db
+    .insert(todos)
+    .values({
+      userId,
+      title,
+      priority: 'Medium',
+      dueDate: dueDate ? new Date(dueDate) : undefined,
+    })
+    .returning()
+
+  revalidatePath('/')
+  revalidatePath('/todo')
+  return newTodo
+}

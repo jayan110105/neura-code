@@ -72,6 +72,13 @@ const menuItems = [
     iconFilled: IconAlarmFilled,
     href: '/reminders',
   },
+  {
+    id: 'testing',
+    title: 'Testing',
+    icon: IconFileText,
+    iconFilled: IconFileTextFilled,
+    href: '/testing',
+  },
 ]
 
 export function AppSidebar() {
