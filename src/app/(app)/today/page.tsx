@@ -1,6 +1,3 @@
-import { auth } from '@/lib/auth'
-import { headers } from 'next/headers'
-import { redirect } from 'next/navigation'
 import { getTodos } from '@/lib/actions/todos'
 import { getReminders } from '@/lib/actions/reminders'
 import { getNotes } from '@/lib/actions/notes'
@@ -9,14 +6,6 @@ import { TodaySection } from '@/components/today-section'
 import { Todo, Reminder, Note, Bookmark } from '@/types'
 
 export default async function TodayPage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  })
-
-  if (!session) {
-    redirect('/sign-in')
-  }
-
   const [allTodos, allReminders, allNotes, allBookmarks] = await Promise.all([
     getTodos(),
     getReminders(),
