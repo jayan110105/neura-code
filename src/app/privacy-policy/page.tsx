@@ -14,7 +14,7 @@ export default function PrivacyPolicyPage() {
               Privacy Policy for NeuraCode
             </h1>
             <p className="mt-4 text-lg text-muted-foreground">
-              Last updated: October 26, 2023
+              Last updated: July 5, 2025
             </p>
           </div>
 
