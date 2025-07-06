@@ -18,15 +18,20 @@ export const getCachedDailyLogs = cache(async (userId: string) => {
   return userDailyLogs
 })
 
+export const getCachedDailyLogsForDate = cache(async (userId: string, date: string) => {
+  const logsForDate = await db.query.dailyLogs.findMany({
+    where: and(
+      eq(dailyLogs.userId, userId),
+      eq(dailyLogs.date, date)
+    ),
+  })
+  return logsForDate
+})
+
 async function updateSummaryInBackground(date: string, userId: string) {
   Promise.resolve().then(async () => {
     try {
-      const logsForDate = await db.query.dailyLogs.findMany({
-        where: and(
-          eq(dailyLogs.userId, userId),
-          eq(dailyLogs.date, date)
-        ),
-      })
+      const logsForDate = await getCachedDailyLogsForDate(userId, date)
       
       const descriptions = logsForDate.map(log => log.description)
       
@@ -153,6 +158,17 @@ export async function deleteDailyLog(id: number) {
   return deletedDailyLog
 }
 
+export const getCachedTodaysDailyLogs = cache(async (userId: string, today: string) => {
+  const todaysLogs = await db.query.dailyLogs.findMany({
+    where: and(
+      eq(dailyLogs.userId, userId),
+      eq(dailyLogs.date, today),
+    ),
+    orderBy: [desc(dailyLogs.createdAt)],
+  })
+  return todaysLogs
+})
+
 export async function getTodaysDailyLogs() {
   const session = await getCachedSession()
   if (!session?.user?.id) {
@@ -160,14 +176,7 @@ export async function getTodaysDailyLogs() {
   }
 
   const today = new Date().toISOString().split('T')[0]
-  const todaysLogs = await db.query.dailyLogs.findMany({
-    where: and(
-      eq(dailyLogs.userId, session.user.id),
-      eq(dailyLogs.date, today),
-    ),
-    orderBy: [desc(dailyLogs.createdAt)],
-  })
-  return todaysLogs
+  return getCachedTodaysDailyLogs(session.user.id, today)
 }
 
 export async function createDailyLogFromAgent(

@@ -3,6 +3,7 @@
 import { db } from '@/db'
 import { dailySummaries } from '@/db/schema'
 import { eq, and } from 'drizzle-orm'
+import { cache } from 'react'
 import { getCachedSession } from '@/lib/session'
 import { generateDailySummary } from './summary'
 import type { DailySummary } from '@/types'
@@ -52,22 +53,26 @@ export async function createOrUpdateDailySummary(
   }
 }
 
-export async function getDailySummary(date: string): Promise<DailySummary | null> {
-  const session = await getCachedSession()
-  if (!session?.user?.id) return null
-
+export const getCachedDailySummary = cache(async (userId: string, date: string): Promise<DailySummary | null> => {
   const [summary] = await db
     .select()
     .from(dailySummaries)
     .where(
       and(
-        eq(dailySummaries.userId, session.user.id),
+        eq(dailySummaries.userId, userId),
         eq(dailySummaries.date, date)
       )
     )
     .limit(1)
 
   return summary || null
+})
+
+export async function getDailySummary(date: string): Promise<DailySummary | null> {
+  const session = await getCachedSession()
+  if (!session?.user?.id) return null
+
+  return getCachedDailySummary(session.user.id, date)
 }
 
 export async function deleteDailySummary(date: string): Promise<boolean> {

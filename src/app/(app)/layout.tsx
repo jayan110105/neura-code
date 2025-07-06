@@ -1,18 +1,15 @@
 import { AppSidebar } from '@/components/app-sidebar'
 import { PageContainer } from '@/components/page-container'
 import { SidebarProvider } from '@/components/ui/sidebar'
-import { auth } from '@/lib/auth'
-import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { getCachedSession } from '@/lib/session'
 
 export default async function AppLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  })
+  const session = await getCachedSession()
 
   if (!session?.user) {
     return redirect('/sign-in')
