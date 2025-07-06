@@ -4,6 +4,7 @@ import { createTodoFromAgent } from '@/lib/actions/todos'
 import { createBookmarkFromAgent } from '@/lib/actions/bookmarks'
 import { createNoteFromAgent } from '@/lib/actions/notes'
 import { createReminderFromAgent } from '@/lib/actions/reminders'
+import { createDailyLogFromAgent } from '@/lib/actions/daily-logs'
 
 export const getWhatsappTools = (userId: string) => {
   return {
@@ -74,19 +75,20 @@ export const getWhatsappTools = (userId: string) => {
       },
     }),
     dailyLog: tool({
-      description:
-        'Create a daily log, which is a note with a specific title format.',
+      description: 'Create a new daily log entry for today.',
       parameters: z.object({
-        content: z.string().describe('The content of the daily log.'),
+        description: z.string().describe('The content of the daily log.'),
       }),
-      execute: async ({ content }) => {
-        const today = new Date().toLocaleDateString('en-US', {
+      execute: async ({ description }) => {
+        const today = new Date()
+        const date = today.toISOString().split('T')[0]
+        const formattedDate = today.toLocaleDateString('en-US', {
           month: 'long',
           day: 'numeric',
           year: 'numeric',
         })
-        await createNoteFromAgent(userId, `Daily Log - ${today}`, content)
-        return `Daily log for ${today} created.`
+        await createDailyLogFromAgent(userId, description, date)
+        return `Daily log for ${formattedDate} created.`
       },
     }),
   }

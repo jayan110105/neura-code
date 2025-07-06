@@ -101,3 +101,38 @@ export const bookmarksRelations = relations(bookmarks, ({ one }) => ({
     references: [user.id],
   }),
 }))
+
+export const dailyLogs = pgTable('daily_logs', {
+  id: serial('id').primaryKey(),
+  date: date('date').notNull(),
+  description: text('description'),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
+export const dailyLogsRelations = relations(dailyLogs, ({ one }) => ({
+  user: one(user, {
+    fields: [dailyLogs.userId],
+    references: [user.id],
+  }),
+}))
+
+export const dailySummaries = pgTable('daily_summaries', {
+  id: serial('id').primaryKey(),
+  date: date('date').notNull(),
+  summary: text('summary').notNull(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
+
+export const dailySummariesRelations = relations(dailySummaries, ({ one }) => ({
+  user: one(user, {
+    fields: [dailySummaries.userId],
+    references: [user.id],
+  }),
+}))

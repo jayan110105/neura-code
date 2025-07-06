@@ -1,4 +1,5 @@
 export * from './bookmarks'
+export * from './daily-logs'
 export * from './notes'
 export * from './reminders'
 export * from './todos'

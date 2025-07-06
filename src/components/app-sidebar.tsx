@@ -24,6 +24,7 @@ import {
   IconCopyCheck,
   IconCopyCheckFilled,
   IconLogout,
+  IconNotebook,
 } from '@tabler/icons-react'
 import { authClient } from '@/lib/auth-client'
 import { useRouter, usePathname } from 'next/navigation'
@@ -50,6 +51,13 @@ const menuItems = [
     icon: IconFileText,
     iconFilled: IconFileTextFilled,
     href: '/notes',
+  },
+  {
+    id: 'daily-logs',
+    title: 'Daily Logs',
+    icon: IconNotebook,
+    iconFilled: IconNotebook,
+    href: '/daily-logs',
   },
   {
     id: 'bookmarks',

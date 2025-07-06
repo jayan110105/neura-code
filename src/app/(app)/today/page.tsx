@@ -2,25 +2,31 @@ import { getTodos } from '@/lib/actions/todos'
 import { getReminders } from '@/lib/actions/reminders'
 import { getNotes } from '@/lib/actions/notes'
 import { getBookmarks } from '@/lib/actions/bookmarks'
+import { getTodaysDailyLogs } from '@/lib/actions/daily-logs'
+import { getDailySummary } from '@/lib/actions/daily-summaries'
 import { TodaySection } from '@/components/today-section'
 import { Todo, Reminder, Note, Bookmark } from '@/types'
 
 export default async function TodayPage() {
-  const [allTodos, allReminders, allNotes, allBookmarks] = await Promise.all([
+  const today = new Date().toISOString().split('T')[0]
+  
+  const [allTodos, allReminders, allNotes, allBookmarks, dailyLogs, dailySummary] = await Promise.all([
     getTodos(),
     getReminders(),
     getNotes(),
     getBookmarks(),
+    getTodaysDailyLogs(),
+    getDailySummary(today),
   ])
 
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
+  const todayDate = new Date()
+  todayDate.setHours(0, 0, 0, 0)
 
   const isToday = (date: Date | null | undefined) => {
     if (!date) return false
     const d = new Date(date)
     d.setHours(0, 0, 0, 0)
-    return d.getTime() === today.getTime()
+    return d.getTime() === todayDate.getTime()
   }
 
   const isReminderForToday = (reminder: Reminder) => {
@@ -31,7 +37,7 @@ export default async function TodayPage() {
     const reminderDate = new Date(reminder.date)
     reminderDate.setHours(0, 0, 0, 0)
 
-    if (reminderDate.getTime() > today.getTime()) {
+    if (reminderDate.getTime() > todayDate.getTime()) {
       return false
     }
 
@@ -39,12 +45,12 @@ export default async function TodayPage() {
       case 'Daily':
         return true
       case 'Weekly':
-        return reminderDate.getDay() === today.getDay()
+        return reminderDate.getDay() === todayDate.getDay()
       case 'Monthly':
-        return reminderDate.getDate() === today.getDate()
+        return reminderDate.getDate() === todayDate.getDate()
       case 'None':
       default:
-        return reminderDate.getTime() === today.getTime()
+        return reminderDate.getTime() === todayDate.getTime()
     }
   }
 
@@ -61,6 +67,8 @@ export default async function TodayPage() {
       reminders={reminders}
       notes={notes}
       bookmarks={bookmarks}
+      dailyLogs={dailyLogs}
+      dailySummary={dailySummary}
     />
   )
 } 
