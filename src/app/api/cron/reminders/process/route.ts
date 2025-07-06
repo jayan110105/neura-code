@@ -4,7 +4,7 @@ import { reminders } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { sendWhatsappMessage } from '@/lib/utils';
 
-function shouldSendReminder(reminder: any, currentDate: string, currentTime: string): boolean {
+function shouldSendReminder(reminder: any, currentDate: string, currentTime: string, istTime: Date): boolean {
   if (!reminder.enabled) {
     console.log(`Reminder ${reminder.id} is disabled`);
     return false;
@@ -13,10 +13,9 @@ function shouldSendReminder(reminder: any, currentDate: string, currentTime: str
   const reminderDate = reminder.date;
   const reminderTime = reminder.time || '00:00:00';
   const lastSent = reminder.lastSent ? new Date(reminder.lastSent) : null;
-  const now = new Date(`${currentDate}T${currentTime}`);
 
   console.log(`Checking reminder ${reminder.id}: date=${reminderDate}, time=${reminderTime}, repeat=${reminder.repeat}, lastSent=${lastSent?.toISOString()}`);
-  console.log(`Current: date=${currentDate}, time=${currentTime}`);
+  console.log(`Current: date=${currentDate}, time=${currentTime} (IST)`);
 
   let shouldSend = false;
   
@@ -29,7 +28,8 @@ function shouldSendReminder(reminder: any, currentDate: string, currentTime: str
     case 'Daily':
       shouldSend = reminderTime <= currentTime;
       if (shouldSend && lastSent) {
-        const lastSentDate = lastSent.toISOString().split('T')[0];
+        const lastSentIST = new Date(lastSent.toLocaleString("en-US", {timeZone: "Asia/Kolkata"}));
+        const lastSentDate = lastSentIST.toISOString().split('T')[0];
         shouldSend = lastSentDate !== currentDate;
         console.log(`Daily repeat: timeMatch=${reminderTime <= currentTime}, lastSentDate=${lastSentDate}, currentDate=${currentDate}, shouldSend=${shouldSend}`);
       } else {
@@ -39,10 +39,10 @@ function shouldSendReminder(reminder: any, currentDate: string, currentTime: str
     
     case 'Weekly':
       const reminderDayOfWeek = new Date(reminderDate).getDay();
-      const currentDayOfWeek = new Date(currentDate).getDay();
+      const currentDayOfWeek = istTime.getDay();
       shouldSend = reminderDayOfWeek === currentDayOfWeek && reminderTime <= currentTime;
       if (shouldSend && lastSent) {
-        const weeksDiff = Math.floor((now.getTime() - lastSent.getTime()) / (7 * 24 * 60 * 60 * 1000));
+        const weeksDiff = Math.floor((istTime.getTime() - lastSent.getTime()) / (7 * 24 * 60 * 60 * 1000));
         shouldSend = weeksDiff >= 1;
         console.log(`Weekly repeat: dayMatch=${reminderDayOfWeek === currentDayOfWeek}, timeMatch=${reminderTime <= currentTime}, weeksDiff=${weeksDiff}, shouldSend=${shouldSend}`);
       } else {
@@ -52,13 +52,14 @@ function shouldSendReminder(reminder: any, currentDate: string, currentTime: str
     
     case 'Monthly':
       const reminderDay = new Date(reminderDate).getDate();
-      const currentDay = new Date(currentDate).getDate();
+      const currentDay = istTime.getDate();
       shouldSend = reminderDay === currentDay && reminderTime <= currentTime;
       if (shouldSend && lastSent) {
-        const lastSentMonth = lastSent.getMonth();
-        const lastSentYear = lastSent.getFullYear();
-        const currentMonth = now.getMonth();
-        const currentYear = now.getFullYear();
+        const lastSentIST = new Date(lastSent.toLocaleString("en-US", {timeZone: "Asia/Kolkata"}));
+        const lastSentMonth = lastSentIST.getMonth();
+        const lastSentYear = lastSentIST.getFullYear();
+        const currentMonth = istTime.getMonth();
+        const currentYear = istTime.getFullYear();
         shouldSend = !(lastSentMonth === currentMonth && lastSentYear === currentYear);
         console.log(`Monthly repeat: dayMatch=${reminderDay === currentDay}, timeMatch=${reminderTime <= currentTime}, monthMatch=${!(lastSentMonth === currentMonth && lastSentYear === currentYear)}, shouldSend=${shouldSend}`);
       } else {
@@ -78,10 +79,12 @@ function shouldSendReminder(reminder: any, currentDate: string, currentTime: str
 async function processReminders() {
   try {
     const now = new Date();
-    const currentDate = now.toISOString().split('T')[0]; // YYYY-MM-DD
-    const currentTime = now.toTimeString().split(' ')[0]; // HH:MM:SS
+    const istTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Kolkata"}));
     
-    console.log(`Processing reminders at ${currentDate} ${currentTime}`);
+    const currentDate = istTime.toISOString().split('T')[0]; // YYYY-MM-DD
+    const currentTime = istTime.toTimeString().split(' ')[0]; // HH:MM:SS
+    
+    console.log(`Processing reminders at ${currentDate} ${currentTime} (IST)`);
     
     const allReminders = await db.query.reminders.findMany({
       where: eq(reminders.enabled, true),
@@ -100,7 +103,7 @@ async function processReminders() {
         continue;
       }
 
-      if (!shouldSendReminder(reminder, currentDate, currentTime)) {
+      if (!shouldSendReminder(reminder, currentDate, currentTime, istTime)) {
         console.log(`Skipping reminder ${reminder.id} - not time to send`);
         continue;
       }
@@ -138,7 +141,6 @@ export async function POST(request: Request) {
     const { searchParams } = new URL(request.url);
     const token = searchParams.get('token');
     
-    // Only allow internal calls or authenticated calls
     if (process.env.CRON_SECRET_TOKEN && token !== process.env.CRON_SECRET_TOKEN) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
