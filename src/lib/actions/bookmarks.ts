@@ -6,6 +6,8 @@ import { eq, and } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { cache } from 'react'
 import { getCachedSession } from '../session'
+import { storeEmbedding, deleteEmbedding } from './embedding-actions'
+import { prepareTextForEmbedding } from '../embedding-service'
 
 export const getCachedBookmarks = cache(async (userId: string) => {
   const userBookmarks = await db.query.bookmarks.findMany({
@@ -43,6 +45,14 @@ export async function createBookmark(formData: {
     })
     .returning()
 
+  try {
+    const content = `${formData.description || ''} ${formData.tags?.join(' ') || ''} ${formData.url}`.trim()
+    const embeddingContent = prepareTextForEmbedding(content, formData.title)
+    await storeEmbedding(session.user.id, embeddingContent, 'bookmark', newBookmark.id)
+  } catch (error) {
+    console.error('Error storing embedding for bookmark:', error)
+  }
+
   revalidatePath('/')
   revalidatePath('/bookmarks')
   return newBookmark
@@ -70,6 +80,14 @@ export async function updateBookmark(
     .where(and(eq(bookmarks.id, id), eq(bookmarks.userId, session.user.id)))
     .returning()
 
+  try {
+    const content = `${formData.description || ''} ${formData.tags?.join(' ') || ''} ${formData.url}`.trim()
+    const embeddingContent = prepareTextForEmbedding(content, formData.title)
+    await storeEmbedding(session.user.id, embeddingContent, 'bookmark', id)
+  } catch (error) {
+    console.error('Error updating embedding for bookmark:', error)
+  }
+
   revalidatePath('/')
   revalidatePath('/bookmarks')
   return updatedBookmark
@@ -85,6 +103,12 @@ export async function deleteBookmark(id: number) {
     .delete(bookmarks)
     .where(and(eq(bookmarks.id, id), eq(bookmarks.userId, session.user.id)))
     .returning({ id: bookmarks.id })
+
+  try {
+    await deleteEmbedding(session.user.id, 'bookmark', id)
+  } catch (error) {
+    console.error('Error deleting embedding for bookmark:', error)
+  }
 
   revalidatePath('/')
   revalidatePath('/bookmarks')
@@ -104,6 +128,13 @@ export async function createBookmarkFromAgent(
       url,
     })
     .returning()
+
+  try {
+    const embeddingContent = prepareTextForEmbedding(url, title)
+    await storeEmbedding(userId, embeddingContent, 'bookmark', newBookmark.id)
+  } catch (error) {
+    console.error('Error storing embedding for bookmark:', error)
+  }
 
   revalidatePath('/')
   revalidatePath('/bookmarks')

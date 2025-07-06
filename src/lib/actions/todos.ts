@@ -6,6 +6,8 @@ import { eq, and } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { cache } from 'react'
 import { getCachedSession } from '../session'
+import { storeEmbedding, deleteEmbedding } from './embedding-actions'
+import { prepareTextForEmbedding } from '../embedding-service'
 
 export const getCachedTodos = cache(async (userId: string) => {
   const userTodos = await db.query.todos.findMany({
@@ -46,6 +48,14 @@ export async function createTodo(formData: {
       userId: session.user.id,
     })
     .returning()
+
+  try {
+    const content = `${formData.category || ''} ${formData.priority}`.trim()
+    const embeddingContent = prepareTextForEmbedding(content, formData.title)
+    await storeEmbedding(session.user.id, embeddingContent, 'todo', newTodo.id)
+  } catch (error) {
+    console.error('Error storing embedding for todo:', error)
+  }
 
   revalidatePath('/')
   revalidatePath('/todo')
@@ -114,6 +124,12 @@ export async function deleteTodo(id: number) {
     .where(and(eq(todos.id, id), eq(todos.userId, session.user.id)))
     .returning({ id: todos.id })
 
+  try {
+    await deleteEmbedding(session.user.id, 'todo', id)
+  } catch (error) {
+    console.error('Error deleting embedding for todo:', error)
+  }
+
   revalidatePath('/')
   revalidatePath('/todo')
   return deletedTodo
@@ -133,6 +149,13 @@ export async function createTodoFromAgent(
       dueDate: dueDate ? new Date(dueDate) : undefined,
     })
     .returning()
+
+  try {
+    const embeddingContent = prepareTextForEmbedding('Medium', title)
+    await storeEmbedding(userId, embeddingContent, 'todo', newTodo.id)
+  } catch (error) {
+    console.error('Error storing embedding for todo:', error)
+  }
 
   revalidatePath('/')
   revalidatePath('/todo')

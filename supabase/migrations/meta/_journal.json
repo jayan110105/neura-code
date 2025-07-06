@@ -78,6 +78,34 @@
       "when": 1751782639744,
       "tag": "0010_minor_hellcat",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1751794087888,
+      "tag": "0011_steep_wong",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1751800165916,
+      "tag": "0012_sleepy_the_initiative",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1751800250723,
+      "tag": "0013_large_speedball",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1751800549569,
+      "tag": "0014_light_spot",
+      "breakpoints": true
     }
   ]
 }

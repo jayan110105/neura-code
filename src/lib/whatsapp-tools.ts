@@ -5,6 +5,13 @@ import { createBookmarkFromAgent } from '@/lib/actions/bookmarks'
 import { createNoteFromAgent } from '@/lib/actions/notes'
 import { createReminderFromAgent } from '@/lib/actions/reminders'
 import { createDailyLogFromAgent } from '@/lib/actions/daily-logs'
+import { getContextualContent } from '@/lib/actions/embedding-actions'
+import { createGoogleGenerativeAI } from '@ai-sdk/google'
+import { generateText } from 'ai'
+
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.GOOGLE_API_KEY,
+})
 
 export const getWhatsappTools = (userId: string) => {
   return {
@@ -89,6 +96,34 @@ export const getWhatsappTools = (userId: string) => {
         })
         await createDailyLogFromAgent(userId, description, date)
         return `Daily log for ${formattedDate} created.`
+      },
+    }),
+    ragSearch: tool({
+      description: 'Search through the user\'s knowledge base (notes, bookmarks, todos, daily logs) to find relevant information and provide context-aware answers. Use this when the user asks questions about their existing content or wants to find/recall something they\'ve stored.',
+      parameters: z.object({
+        query: z.string().describe('The search query or question to find relevant content in the user\'s knowledge base'),
+        maxResults: z.number().optional().describe('Maximum number of results to return (default: 5)'),
+      }),
+      execute: async ({ query, maxResults = 5 }) => {
+        try {
+          const contextualContent = await getContextualContent(userId, query, maxResults)
+          
+          if (contextualContent === 'No relevant content found.') {
+            return "I couldn't find any relevant content in your knowledge base for that query. You might want to add some notes, bookmarks, or other content first."
+          }
+          
+          const { text } = await generateText({
+            model: google('models/gemini-2.5-flash'),
+            system: `You are Neura, helping the user by searching their personal knowledge base. Use the provided context to give a helpful, accurate response. Be conversational and reference the specific content you found. If the context contains multiple relevant items, summarize them clearly.`,
+            prompt: `User query: "${query}"\n\nRelevant content from their knowledge base:\n${contextualContent}\n\nPlease provide a helpful response based on this information.`,
+            maxTokens: 800,
+          })
+          
+          return text
+        } catch (error) {
+          console.error('RAG search error:', error)
+          return "I couldn't search your knowledge base right now. Please try again later."
+        }
       },
     }),
   }

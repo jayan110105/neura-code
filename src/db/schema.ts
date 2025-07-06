@@ -8,6 +8,9 @@ import {
   date,
   time,
   pgEnum,
+  integer,
+  vector,
+  index,
 } from 'drizzle-orm/pg-core'
 import { user } from './auth-schema'
 
@@ -151,6 +154,28 @@ export const dailySummariesRelations = relations(dailySummaries, ({ one }) => ({
 export const messagesRelations = relations(messages, ({ one }) => ({
   user: one(user, {
     fields: [messages.userId],
+    references: [user.id],
+  }),
+}))
+
+export const embeddings = pgTable('embeddings', {
+  id: serial('id').primaryKey(),
+  content: text('content').notNull(),
+  embedding: vector('embedding', { dimensions: 512 }),
+  contentType: text('content_type').notNull(),
+  contentId: integer('content_id').notNull(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => [
+  index('embeddingIndex').using('hnsw', table.embedding.op('vector_cosine_ops')),
+])
+
+export const embeddingsRelations = relations(embeddings, ({ one }) => ({
+  user: one(user, {
+    fields: [embeddings.userId],
     references: [user.id],
   }),
 }))

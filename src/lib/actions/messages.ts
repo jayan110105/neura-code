@@ -43,4 +43,12 @@ export async function getConversationHistory(userId: string, limit: number = 10)
     content: msg.content,
     timestamp: msg.createdAt,
   }))
+}
+
+export async function clearAllMessages(userId: string) {
+  await db
+    .delete(messages)
+    .where(eq(messages.userId, userId))
+  
+  return { success: true, message: 'All messages cleared successfully' }
 } 

@@ -7,6 +7,8 @@ import { revalidatePath } from 'next/cache'
 import { cache } from 'react'
 import { getCachedSession } from '../session'
 import { createOrUpdateDailySummary } from './daily-summaries'
+import { storeEmbedding, deleteEmbedding } from './embedding-actions'
+import { prepareTextForEmbedding } from '../embedding-service'
 
 export const getCachedDailyLogs = cache(async (userId: string) => {
   const userDailyLogs = await db.query.dailyLogs.findMany({
@@ -62,6 +64,15 @@ export async function createDailyLog(formData: {
     })
     .returning()
 
+  try {
+    if (formData.description) {
+      const embeddingContent = prepareTextForEmbedding(formData.description, `Daily Log - ${formData.date}`)
+      await storeEmbedding(session.user.id, embeddingContent, 'daily_log', newDailyLog.id)
+    }
+  } catch (error) {
+    console.error('Error storing embedding for daily log:', error)
+  }
+
   updateSummaryInBackground(formData.date, session.user.id)
 
   revalidatePath('/')
@@ -90,6 +101,17 @@ export async function updateDailyLog(
     .where(and(eq(dailyLogs.id, id), eq(dailyLogs.userId, session.user.id)))
     .returning()
 
+  try {
+    if (formData.description) {
+      const embeddingContent = prepareTextForEmbedding(formData.description, `Daily Log - ${formData.date}`)
+      await storeEmbedding(session.user.id, embeddingContent, 'daily_log', id)
+    } else {
+      await deleteEmbedding(session.user.id, 'daily_log', id)
+    }
+  } catch (error) {
+    console.error('Error updating embedding for daily log:', error)
+  }
+
   updateSummaryInBackground(formData.date, session.user.id)
 
   revalidatePath('/')
@@ -114,6 +136,12 @@ export async function deleteDailyLog(id: number) {
     .delete(dailyLogs)
     .where(and(eq(dailyLogs.id, id), eq(dailyLogs.userId, session.user.id)))
     .returning({ id: dailyLogs.id })
+
+  try {
+    await deleteEmbedding(session.user.id, 'daily_log', id)
+  } catch (error) {
+    console.error('Error deleting embedding for daily log:', error)
+  }
 
   if (logToDelete) {
     updateSummaryInBackground(logToDelete.date, session.user.id)
@@ -155,6 +183,13 @@ export async function createDailyLogFromAgent(
       date,
     })
     .returning()
+
+  try {
+    const embeddingContent = prepareTextForEmbedding(description, `Daily Log - ${date}`)
+    await storeEmbedding(userId, embeddingContent, 'daily_log', newDailyLog.id)
+  } catch (error) {
+    console.error('Error storing embedding for daily log:', error)
+  }
 
   updateSummaryInBackground(date, userId)
 

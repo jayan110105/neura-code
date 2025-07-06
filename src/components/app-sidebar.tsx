@@ -36,7 +36,7 @@ const menuItems = [
     title: 'Search',
     icon: IconSearch,
     iconFilled: IconSearch,
-    href: '#',
+    href: '/search',
   },
   {
     id: 'today',
@@ -131,7 +131,6 @@ export function AppSidebar() {
                     ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                     : 'text-muted-foreground hover:bg-sidebar-accent'
                 }`}
-                {...(item.id === 'search' ? { onClick: () => {} } : {})}
               >
                 <IconComponent className="!size-6" />
                 <span>{item.title}</span>
@@ -140,13 +139,9 @@ export function AppSidebar() {
 
             return (
               <SidebarMenuItem key={item.id}>
-                {item.id === 'search' ? (
-                  button
-                ) : (
-                  <Link href={item.href} passHref>
-                    {button}
-                  </Link>
-                )}
+                <Link href={item.href} passHref>
+                  {button}
+                </Link>
               </SidebarMenuItem>
             )
           })}

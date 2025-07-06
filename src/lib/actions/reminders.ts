@@ -8,6 +8,8 @@ import { Reminder } from '@/types'
 import { cache } from 'react'
 import { getCachedSession } from '../session'
 import { formatLocalDate } from '../utils'
+import { storeEmbedding, deleteEmbedding } from './embedding-actions'
+import { prepareTextForEmbedding } from '../embedding-service'
 
 export const getCachedReminders = cache(async (userId: string): Promise<Reminder[]> => {
   const userReminders = await db.query.reminders.findMany({
@@ -51,6 +53,14 @@ export async function createReminder(formData: {
     })
     .returning()
 
+  try {
+    const content = `${formData.description || ''} ${formData.category || ''}`.trim()
+    const embeddingContent = prepareTextForEmbedding(content, formData.title)
+    await storeEmbedding(session.user.id, embeddingContent, 'reminder', newReminder.id)
+  } catch (error) {
+    console.error('Error storing embedding for reminder:', error)
+  }
+
   revalidatePath('/')
   revalidatePath('/reminders')
   return {
@@ -83,6 +93,14 @@ export async function updateReminder(
     })
     .where(and(eq(reminders.id, id), eq(reminders.userId, session.user.id)))
     .returning()
+
+  try {
+    const content = `${formData.description || ''} ${formData.category || ''}`.trim()
+    const embeddingContent = prepareTextForEmbedding(content, formData.title)
+    await storeEmbedding(session.user.id, embeddingContent, 'reminder', id)
+  } catch (error) {
+    console.error('Error updating embedding for reminder:', error)
+  }
 
   revalidatePath('/')
   revalidatePath('/reminders')
@@ -123,6 +141,12 @@ export async function deleteReminder(id: number) {
     .where(and(eq(reminders.id, id), eq(reminders.userId, session.user.id)))
     .returning({ id: reminders.id })
 
+  try {
+    await deleteEmbedding(session.user.id, 'reminder', id)
+  } catch (error) {
+    console.error('Error deleting embedding for reminder:', error)
+  }
+
   revalidatePath('/')
   revalidatePath('/reminders')
   return deletedReminder
@@ -144,6 +168,13 @@ export async function createReminderFromAgent(
       repeat: 'None',
     })
     .returning()
+
+  try {
+    const embeddingContent = prepareTextForEmbedding('', title)
+    await storeEmbedding(userId, embeddingContent, 'reminder', newReminder.id)
+  } catch (error) {
+    console.error('Error storing embedding for reminder:', error)
+  }
 
   revalidatePath('/')
   revalidatePath('/reminders')
