@@ -258,10 +258,10 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
     <div className="mx-auto max-w-4xl p-6 pt-0">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-foreground mb-1 text-[26px] font-bold">
+          <h1 className="text-foreground mb-1 text-[26px] font-bold select-none">
             Reminders
           </h1>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-muted-foreground text-lg select-none">
             Never miss important tasks and events
           </p>
         </div>

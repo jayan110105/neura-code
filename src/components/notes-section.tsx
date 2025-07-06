@@ -112,8 +112,8 @@ export function NotesSection({ notes }: { notes: Note[] }) {
     <div className="mx-auto max-w-4xl p-6 pt-0">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-foreground mb-1 text-[26px] font-bold">Notes</h1>
-          <p className="text-muted-foreground text-lg">
+          <h1 className="text-foreground mb-1 text-[26px] font-bold select-none">Notes</h1>
+          <p className="text-muted-foreground text-lg select-none">
             Capture and organize your thoughts
           </p>
         </div>

@@ -175,10 +175,10 @@ export function DailyLogsSection({ dailyLogs }: DailyLogsSectionProps) {
     <div className="mx-auto max-w-4xl p-6 pt-0">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-foreground mb-1 text-[26px] font-bold">
+          <h1 className="text-foreground mb-1 text-[26px] font-bold select-none">
             Daily Logs
           </h1>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-muted-foreground text-lg select-none">
             Track your daily reflections and progress
           </p>
         </div>
@@ -222,11 +222,14 @@ export function DailyLogsSection({ dailyLogs }: DailyLogsSectionProps) {
               />
             </div>
           </div>
-          <DialogFooter>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button variant="ghost" onClick={() => setIsDialogOpen(false)}>
+              Cancel
+            </Button>
             <Button onClick={handleSubmit} variant="outline">
               {editingLog ? 'Update' : 'Create Log'}
             </Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -248,7 +251,7 @@ export function DailyLogsSection({ dailyLogs }: DailyLogsSectionProps) {
         <div className="space-y-8">
           {todayLogs.length > 0 && (
             <div>
-              <h2 className="text-foreground mb-4 flex flex-col gap-2 font-medium text-lg">
+              <h2 className="text-foreground mb-4 flex flex-col gap-2 font-medium text-lg select-none">
                 Today
                 <div className="text-muted-foreground flex items-center gap-1 text-sm">
                   <IconCircleCheck className="h-3 w-3" />
@@ -264,7 +267,7 @@ export function DailyLogsSection({ dailyLogs }: DailyLogsSectionProps) {
           )}
           {yesterdayLogs.length > 0 && (
             <div>
-              <h2 className="text-foreground mb-4 flex flex-col gap-2 font-medium text-lg">
+              <h2 className="text-foreground mb-4 flex flex-col gap-2 font-medium text-lg select-none">
                 Yesterday
                 <div className="text-muted-foreground flex items-center gap-1 text-sm">
                   <IconCircleCheck className="h-3 w-3" />
@@ -280,7 +283,7 @@ export function DailyLogsSection({ dailyLogs }: DailyLogsSectionProps) {
           )}
           {thisWeekLogs.length > 0 && (
             <div>
-              <h2 className="text-foreground mb-4 flex flex-col gap-2 font-medium text-lg">
+              <h2 className="text-foreground mb-4 flex flex-col gap-2 font-medium text-lg select-none">
                 This Week
                 <div className="text-muted-foreground flex items-center gap-1 text-sm">
                   <IconCircleCheck className="h-3 w-3" />
@@ -296,7 +299,7 @@ export function DailyLogsSection({ dailyLogs }: DailyLogsSectionProps) {
           )}
           {olderLogs.length > 0 && (
             <div>
-              <h2 className="text-foreground mb-4 flex flex-col gap-2 font-medium text-lg">
+              <h2 className="text-foreground mb-4 flex flex-col gap-2 font-medium text-lg select-none">
                 Older Logs
                 <div className="text-muted-foreground flex items-center gap-1 text-sm">
                   <IconCircleCheck className="h-3 w-3" />

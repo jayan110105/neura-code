@@ -46,8 +46,8 @@ export function TodaySection({
   return (
     <div className="mx-auto max-w-4xl p-6 pt-0">
       <div className="mb-8">
-        <h1 className="text-foreground mb-1 text-[26px] font-bold">Today</h1>
-        <p className="text-muted-foreground mb-6 text-lg">
+        <h1 className="text-foreground mb-1 text-[26px] font-bold select-none">Today</h1>
+        <p className="text-muted-foreground mb-6 text-lg select-none">
           Your captured content organized by type
         </p>
 

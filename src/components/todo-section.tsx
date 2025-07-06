@@ -332,8 +332,8 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
     <div className="mx-auto max-w-4xl p-6 pt-0">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-foreground mb-1 text-[26px] font-bold">Todo</h1>
-          <p className="text-muted-foreground text-lg">
+          <h1 className="text-foreground mb-1 text-[26px] font-bold select-none">Todo</h1>
+          <p className="text-muted-foreground text-lg select-none">
             Manage your tasks and priorities
           </p>
         </div>
@@ -349,7 +349,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
 
       <div className="space-y-8">
         <div>
-          <h2 className="text-foreground mb-4 flex flex-col gap-2 font-medium text-lg">
+          <h2 className="text-foreground mb-4 flex flex-col gap-2 font-medium text-lg select-none">
             Today
             <div className="text-muted-foreground flex items-center gap-1 text-sm">
               <IconCircleCheck className="h-3 w-3" />
@@ -363,7 +363,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
           </div>
         </div>
         <div>
-          <h2 className="text-foreground mb-4 flex flex-col gap-2 font-medium text-lg">
+          <h2 className="text-foreground mb-4 flex flex-col gap-2 font-medium text-lg select-none">
             Upcoming
             <div className="text-muted-foreground flex items-center gap-1 text-sm">
               <IconCircleCheck className="h-3 w-3" />

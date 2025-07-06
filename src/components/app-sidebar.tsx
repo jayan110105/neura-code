@@ -9,6 +9,7 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
   SidebarFooter,
+  useSidebar,
 } from '@/components/ui/sidebar'
 import {
   IconFileText,
@@ -92,6 +93,7 @@ const menuItems = [
 export function AppSidebar() {
   const router = useRouter()
   const pathname = usePathname()
+  const { isMobile, setOpenMobile } = useSidebar()
 
   const handleSignOut = async () => {
     await authClient.signOut({
@@ -123,6 +125,12 @@ export function AppSidebar() {
             const isActive = pathname === item.href
             const IconComponent = isActive ? item.iconFilled : item.icon
 
+            const handleLinkClick = () => {
+              if (isMobile) {
+                setOpenMobile(false)
+              }
+            }
+
             const button = (
               <SidebarMenuButton
                 isActive={isActive}
@@ -131,6 +139,7 @@ export function AppSidebar() {
                     ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                     : 'text-muted-foreground hover:bg-sidebar-accent'
                 }`}
+                onClick={handleLinkClick}
               >
                 <IconComponent className="!size-6" />
                 <span>{item.title}</span>

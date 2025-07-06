@@ -163,10 +163,10 @@ export function BookmarksSection({ bookmarks }: { bookmarks: Bookmark[] }) {
     <div className="mx-auto max-w-4xl p-6 pt-0">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-foreground mb-1 text-[26px] font-bold">
+          <h1 className="text-foreground mb-1 text-[26px] font-bold select-none">
             Bookmarks
           </h1>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-muted-foreground text-lg select-none">
             Save and organize your favorite links
           </p>
         </div>
