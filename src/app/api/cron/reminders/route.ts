@@ -21,14 +21,56 @@ export async function GET(request: Request) {
     
     const processUrl = `${baseUrl}/api/cron/reminders/process${token ? `?token=${token}` : ''}`;
     
-    fetch(processUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    }).catch((error) => {
-      console.error('Failed to trigger reminder processing:', error);
-    });
+    // Improved fetch with timeout and retry logic
+    const triggerProcessing = async () => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+      
+      try {
+        const response = await fetch(processUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          signal: controller.signal,
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        console.log('Process endpoint triggered successfully');
+      } catch (error) {
+        clearTimeout(timeoutId);
+        console.error('Failed to trigger reminder processing:', error);
+        
+        // Retry once after 2 seconds
+        setTimeout(async () => {
+          try {
+            console.log('Retrying process endpoint...');
+            const retryResponse = await fetch(processUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+            
+            if (retryResponse.ok) {
+              console.log('Process endpoint retry succeeded');
+            } else {
+              console.error('Process endpoint retry failed:', retryResponse.status);
+            }
+          } catch (retryError) {
+            console.error('Process endpoint retry error:', retryError);
+          }
+        }, 2000);
+      }
+    };
+    
+    // Fire and forget with improved error handling
+    triggerProcessing();
 
     return NextResponse.json({ 
       status: 'accepted', 

@@ -138,21 +138,29 @@ async function processReminders() {
 }
 
 export async function POST(request: Request) {
+  const startTime = Date.now();
+  console.log(`[${new Date().toISOString()}] Process endpoint called`);
+  
   try {
     const { searchParams } = new URL(request.url);
     const token = searchParams.get('token');
     
     if (process.env.CRON_SECRET_TOKEN && token !== process.env.CRON_SECRET_TOKEN) {
+      console.log('Process endpoint: Unauthorized access attempt');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const result = await processReminders();
+    
+    const duration = Date.now() - startTime;
+    console.log(`[${new Date().toISOString()}] Process endpoint completed in ${duration}ms`);
     
     if (result.success) {
       return NextResponse.json({ 
         status: 'completed', 
         message: `Reminder processing completed successfully`,
         processed: result.processed,
+        duration: `${duration}ms`,
         timestamp: new Date().toISOString()
       });
     } else {
@@ -160,16 +168,19 @@ export async function POST(request: Request) {
         status: 'failed', 
         message: 'Reminder processing failed',
         error: result.error,
+        duration: `${duration}ms`,
         timestamp: new Date().toISOString()
       }, { status: 500 });
     }
   } catch (error) {
-    console.error('Processing endpoint error:', error);
+    const duration = Date.now() - startTime;
+    console.error(`[${new Date().toISOString()}] Processing endpoint error after ${duration}ms:`, error);
     return NextResponse.json(
       { 
         status: 'error',
         error: 'Internal server error',
         message: error instanceof Error ? error.message : 'Unknown error',
+        duration: `${duration}ms`,
         timestamp: new Date().toISOString()
       },
       { status: 500 }
