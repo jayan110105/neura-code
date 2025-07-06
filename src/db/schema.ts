@@ -53,6 +53,7 @@ export const reminders = pgTable('reminders', {
   date: date('date'),
   repeat: repeatEnum('repeat'),
   enabled: boolean('enabled').default(true).notNull(),
+  lastSent: timestamp('last_sent'),
   category: categoryEnum('category'),
   userId: text('user_id')
     .notNull()
@@ -130,9 +131,26 @@ export const dailySummaries = pgTable('daily_summaries', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
 
+export const messages = pgTable('messages', {
+  id: serial('id').primaryKey(),
+  content: text('content').notNull(),
+  role: text('role').notNull(), // 'user' or 'assistant'
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
 export const dailySummariesRelations = relations(dailySummaries, ({ one }) => ({
   user: one(user, {
     fields: [dailySummaries.userId],
+    references: [user.id],
+  }),
+}))
+
+export const messagesRelations = relations(messages, ({ one }) => ({
+  user: one(user, {
+    fields: [messages.userId],
     references: [user.id],
   }),
 }))

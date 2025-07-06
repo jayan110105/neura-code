@@ -64,6 +64,20 @@
       "when": 1751774782321,
       "tag": "0008_furry_bedlam",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1751777328866,
+      "tag": "0009_happy_colossus",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1751782639744,
+      "tag": "0010_minor_hellcat",
+      "breakpoints": true
     }
   ]
 }

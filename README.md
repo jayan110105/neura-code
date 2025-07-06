@@ -15,7 +15,8 @@
 - [x] Add page navigation from today section
 - [x] Today should have today's things
 - [x] Handle Empty States
-- [ ] Fix Daily Log
+- [x] Fix Daily Log
+- [ ] Testing dione till 11th prompt
 
 ## Notes
 

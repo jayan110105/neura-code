@@ -14,10 +14,8 @@ export async function createOrUpdateDailySummary(
   const session = await getCachedSession()
   if (!session?.user?.id) return null
 
-  // Generate the summary
   const summaryText = await generateDailySummary(descriptions)
   
-  // Check if summary already exists for this date
   const existingSummary = await db
     .select()
     .from(dailySummaries)
@@ -30,7 +28,6 @@ export async function createOrUpdateDailySummary(
     .limit(1)
 
   if (existingSummary.length > 0) {
-    // Update existing summary
     const [updated] = await db
       .update(dailySummaries)
       .set({
@@ -42,7 +39,6 @@ export async function createOrUpdateDailySummary(
     
     return updated
   } else {
-    // Create new summary
     const [created] = await db
       .insert(dailySummaries)
       .values({

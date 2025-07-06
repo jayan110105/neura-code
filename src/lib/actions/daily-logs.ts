@@ -17,10 +17,8 @@ export const getCachedDailyLogs = cache(async (userId: string) => {
 })
 
 async function updateSummaryInBackground(date: string, userId: string) {
-  // Run this in the background without blocking
   Promise.resolve().then(async () => {
     try {
-      // Get all logs for this date
       const logsForDate = await db.query.dailyLogs.findMany({
         where: and(
           eq(dailyLogs.userId, userId),
@@ -28,16 +26,13 @@ async function updateSummaryInBackground(date: string, userId: string) {
         ),
       })
       
-      // Extract descriptions
       const descriptions = logsForDate.map(log => log.description)
       
-      // Update or create summary
       if (descriptions.length > 0) {
         await createOrUpdateDailySummary(date, descriptions)
       }
     } catch (error) {
       console.error('Background summary update failed:', error)
-      // Don't throw - this is background work
     }
   })
 }
@@ -67,7 +62,6 @@ export async function createDailyLog(formData: {
     })
     .returning()
 
-  // Update summary in background - don't wait for it
   updateSummaryInBackground(formData.date, session.user.id)
 
   revalidatePath('/')
@@ -96,7 +90,6 @@ export async function updateDailyLog(
     .where(and(eq(dailyLogs.id, id), eq(dailyLogs.userId, session.user.id)))
     .returning()
 
-  // Update summary in background - don't wait for it
   updateSummaryInBackground(formData.date, session.user.id)
 
   revalidatePath('/')
@@ -111,7 +104,6 @@ export async function deleteDailyLog(id: number) {
     throw new Error('Not authenticated')
   }
 
-  // Get the log first to know which date to update
   const [logToDelete] = await db
     .select({ date: dailyLogs.date })
     .from(dailyLogs)
@@ -123,7 +115,6 @@ export async function deleteDailyLog(id: number) {
     .where(and(eq(dailyLogs.id, id), eq(dailyLogs.userId, session.user.id)))
     .returning({ id: dailyLogs.id })
 
-  // Update summary in background if we found the log
   if (logToDelete) {
     updateSummaryInBackground(logToDelete.date, session.user.id)
   }
@@ -165,7 +156,6 @@ export async function createDailyLogFromAgent(
     })
     .returning()
 
-  // Update summary in background - don't wait for it
   updateSummaryInBackground(date, userId)
 
   revalidatePath('/')

@@ -3,28 +3,12 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateText } from 'ai';
 import { getUserByPhoneNumber } from '@/lib/auth';
 import { getWhatsappTools } from '@/lib/whatsapp-tools';
+import { storeMessage, getConversationHistory } from '@/lib/actions/messages';
+import { sendWhatsappMessage } from '@/lib/utils';
 
 const google = createGoogleGenerativeAI({
   apiKey: process.env.GOOGLE_API_KEY,
 });
-
-async function sendWhatsappMessage(to: string, text: string) {
-  const whatsappApiToken = process.env.WHATSAPP_API_TOKEN;
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-
-  await fetch(`https://graph.facebook.com/v19.0/${phoneNumberId}/messages`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${whatsappApiToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      messaging_product: 'whatsapp',
-      to: to,
-      text: { body: text },
-    }),
-  });
-}
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
@@ -65,28 +49,62 @@ export async function POST(req: Request) {
       return NextResponse.json({ reply }, { status: 200 });
     }
 
+    await storeMessage(user.id, userMessage, 'user');
+
+    const conversationHistory = await getConversationHistory(user.id, 10);
+    
+    const messages = [
+      {
+        role: 'system' as const,
+        content: `You are Neura, a personal AI assistant integrated into WhatsApp. Your purpose is to help users capture and organize information seamlessly.
+The current date is ${new Date().toLocaleDateString('en-CA')} (today is ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}).
+
+You have access to the following tools:
+- createTodo: Creates a new todo item for tasks and plans. This is your default choice for actionable items. You can optionally provide a due date.
+- createBookmark: Saves a URL as a bookmark.
+- createNote: Creates a new note for information you want to remember.
+- createReminder: Sets a new reminder with specific date and time. Only use this when the user explicitly mentions "remind" or "reminder" keywords. Use the current date to infer the correct date and time from the user's request (e.g., "tomorrow" should be calculated based on the current date).
+- dailyLog: Creates a daily log entry for today. These entries are automatically combined into daily summaries.
+
+Your Guidelines:
+- Be concise and helpful. Get straight to the point.
+- Use tools when appropriate. If a user's message maps to one of your tools, use it.
+- Handle links intelligently. If a user provides a URL, treat it as a bookmark. You must generate a concise, descriptive title based on the user's message or by inferring from the URL itself. Then, call the createBookmark tool with the URL and the generated title.
+- Clarify when needed. If you're unsure what the user wants, ask a clarifying question.
+- Keep it conversational. If no tool seems right, just chat with the user.
+- Use the conversation history to provide contextual responses and remember previous interactions.
+
+CRITICAL - Date Handling Rules:
+- When users mention dates without a year (e.g., "March 15th", "next Friday"), ALWAYS assume they mean the NEXT occurrence of that date from today.
+- If the mentioned date has already passed this year, use the NEXT year. If it hasn't passed yet, use the CURRENT year.
+- For example, if today is December 2024 and user says "March 15th", use 2025-03-15.
+- If today is January 2025 and user says "March 15th", use 2025-03-15.
+- Always format dates as YYYY-MM-DD for tool parameters.
+
+IMPORTANT - WhatsApp Formatting Rules:
+- Use *bold* for emphasis (wrap text with asterisks)
+- Use _italics_ for subtle emphasis (wrap text with underscores)
+- Use - for bullet points (dash followed by space)
+- Use 1. 2. 3. for numbered lists (number, period, space)
+- Use > for quotes (angle bracket, space)
+- Keep formatting simple and WhatsApp-compatible
+- Avoid HTML, markdown backticks, or complex formatting`
+      },
+      ...conversationHistory.map(msg => ({
+        role: msg.role as 'user' | 'assistant',
+        content: msg.content
+      })),
+      {
+        role: 'user' as const,
+        content: userMessage
+      }
+    ];
+
     const toolDefinitions = getWhatsappTools(user.id);
 
     const { toolCalls, text } = await generateText({
       model: google('models/gemini-2.5-flash'),
-      system: `You are Neura, a personal AI assistant integrated into WhatsApp. Your purpose is to help users capture and organize information seamlessly.
-The current date is ${new Date().toLocaleDateString('en-CA')}.
-
-You have access to the following tools:
-- \`createTodo\`: Creates a new todo item. You can optionally provide a due date.
-- \`createBookmark\`: Saves a URL as a bookmark.
-- \`createNote\`: Creates a new note.
-- \`createReminder\`: Sets a new reminder. For reminders, you must always provide a specific date and time. Use the current date to infer the correct date and time from the user's request (e.g., "tomorrow" should be calculated based on the current date).
-- \`dailyLog\`: Creates a special note for the current day.
-
-Your Guidelines:
-- Your default action is to create a todo for any task or plan. Only use the \`createReminder\` tool if the user explicitly uses a keyword like "remind" or "reminder".
-- Be concise and helpful. Get straight to the point.
-- Use tools when appropriate. If a user's message maps to one of your tools, use it.
-- Handle links intelligently. If a user provides a URL, treat it as a bookmark. You must generate a concise, descriptive title based on the user's message or by inferring from the URL itself. Then, call the \`createBookmark\` tool with the URL and the generated title.
-- Clarify when needed. If you're unsure what the user wants, ask a clarifying question.
-- Keep it conversational. If no tool seems right, just chat with the user.`,
-      prompt: userMessage,
+      messages,
       tools: toolDefinitions,
       maxSteps: 10,
     });
@@ -111,6 +129,8 @@ Your Guidelines:
     }
 
     console.log('Reply to user:', replyMessage);
+
+    await storeMessage(user.id, replyMessage, 'assistant');
 
     await sendWhatsappMessage(from, replyMessage);
 

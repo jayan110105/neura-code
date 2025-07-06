@@ -21,3 +21,30 @@ export function formatTime(timeString: string | null) {
 
   return `${formattedHour}:${formattedMinutes} ${ampm}`
 }
+
+export async function sendWhatsappMessage(to: string, text: string) {
+  const whatsappApiToken = process.env.WHATSAPP_API_TOKEN;
+  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+
+  if (!whatsappApiToken || !phoneNumberId) {
+    console.error('WhatsApp credentials not configured');
+    return;
+  }
+
+  try {
+    await fetch(`https://graph.facebook.com/v19.0/${phoneNumberId}/messages`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${whatsappApiToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        messaging_product: 'whatsapp',
+        to: to,
+        text: { body: text },
+      }),
+    });
+  } catch (error) {
+    console.error('Failed to send WhatsApp message:', error);
+  }
+}

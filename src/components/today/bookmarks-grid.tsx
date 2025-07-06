@@ -19,7 +19,6 @@ export function BookmarksGrid({
     if (onBookmarkClick) {
       onBookmarkClick(bookmark)
     } else if (bookmark.url) {
-      // Default behavior - open in new tab
       window.open(bookmark.url, '_blank')
     }
   }

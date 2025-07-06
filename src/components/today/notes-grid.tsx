@@ -16,7 +16,6 @@ export function NotesGrid({ notes, onNoteClick }: NotesGridProps) {
     if (onNoteClick) {
       onNoteClick(noteId)
     } else {
-      // Default behavior - log for now
       console.log('Navigate to notes tab with note:', noteId)
     }
   }
