@@ -137,11 +137,16 @@ async function processReminders() {
 }
 
 export async function POST(request: Request) {
+  console.log('Process endpoint called - starting reminder processing');
+  
   try {
     const { searchParams } = new URL(request.url);
     const token = searchParams.get('token');
     
+    console.log(`Process endpoint token check: ${token ? 'token provided' : 'no token'}`);
+    
     if (process.env.CRON_SECRET_TOKEN && token !== process.env.CRON_SECRET_TOKEN) {
+      console.log('Process endpoint: Unauthorized - token mismatch');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
