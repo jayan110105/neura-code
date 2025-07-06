@@ -369,7 +369,10 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
 
       {/* Modal for create & edit */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="border-none sm:max-w-[500px]">
+        <DialogContent 
+          className="border-none sm:max-w-[500px]"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
           <DialogHeader>
             <DialogTitle className="text-left text-lg">
               <Input
@@ -379,7 +382,6 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
                   setFormData((prev) => ({ ...prev, title: e.target.value }))
                 }
                 className="border-none !pl-0 !text-lg focus-visible:ring-0 focus-visible:ring-offset-0"
-                autoFocus
               />
             </DialogTitle>
           </DialogHeader>

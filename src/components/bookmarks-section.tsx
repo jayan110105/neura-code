@@ -263,7 +263,10 @@ export function BookmarksSection({ bookmarks }: { bookmarks: Bookmark[] }) {
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="border-none sm:max-w-[500px]">
+        <DialogContent 
+          className="border-none sm:max-w-[500px]"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
           <DialogHeader>
             <DialogTitle className="text-left text-lg">
               <Input
@@ -273,7 +276,6 @@ export function BookmarksSection({ bookmarks }: { bookmarks: Bookmark[] }) {
                   setFormData((prev) => ({ ...prev, title: e.target.value }))
                 }
                 className="border-none !text-lg focus-visible:ring-0 focus-visible:ring-offset-0"
-                autoFocus
               />
             </DialogTitle>
           </DialogHeader>

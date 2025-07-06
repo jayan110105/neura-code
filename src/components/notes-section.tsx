@@ -175,7 +175,10 @@ export function NotesSection({ notes }: { notes: Note[] }) {
       </div>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="border-none sm:max-w-[500px]">
+        <DialogContent 
+          className="border-none sm:max-w-[500px]"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
           <div tabIndex={0} className="sr-only" />
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">

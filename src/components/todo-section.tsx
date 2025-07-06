@@ -223,14 +223,23 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
     }
   }
 
-  const todayTodos = optimisticTodos.filter(
-    (todo) =>
-      todo.dueDate &&
-      new Date(todo.dueDate).toDateString() === new Date().toDateString(),
-  )
+  const todayTodos = optimisticTodos
+    .filter(
+      (todo) =>
+        !todo.dueDate ||
+        new Date(todo.dueDate).toDateString() === new Date().toDateString(),
+    )
+    .sort((a, b) => {
+      const aHasToday = a.dueDate && new Date(a.dueDate).toDateString() === new Date().toDateString()
+      const bHasToday = b.dueDate && new Date(b.dueDate).toDateString() === new Date().toDateString()
+      
+      if (aHasToday && !bHasToday) return -1
+      if (!aHasToday && bHasToday) return 1
+      return 0
+    })
   const upcomingTodos = optimisticTodos.filter(
     (todo) =>
-      !todo.dueDate ||
+      todo.dueDate &&
       new Date(todo.dueDate).toDateString() !== new Date().toDateString(),
   )
 
@@ -371,7 +380,10 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
 
       {/* Create Todo Modal */}
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent 
+          className="sm:max-w-[500px]"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
           <DialogHeader className="pb-4">
             <DialogTitle className="text-left text-lg">
               <Input
@@ -381,7 +393,6 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
                   setFormData((prev) => ({ ...prev, title: e.target.value }))
                 }
                 className="placeholder-muted-foreground h-auto border-none bg-transparent p-0 !text-lg focus-visible:ring-0"
-                autoFocus
               />
             </DialogTitle>
           </DialogHeader>

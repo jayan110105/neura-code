@@ -193,7 +193,10 @@ export function DailyLogsSection({ dailyLogs }: DailyLogsSectionProps) {
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="border-none sm:max-w-[500px]">
+        <DialogContent 
+          className="border-none sm:max-w-[500px]"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
           <DialogHeader>
             <DialogTitle>
               <TextareaAutosize

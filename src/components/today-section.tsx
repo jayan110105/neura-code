@@ -1,7 +1,6 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { Card, CardContent } from '@/components/ui/card'
 import { NotesGrid } from '@/components/today/notes-grid'
 import { BookmarksGrid } from '@/components/today/bookmarks-grid'
 import { TodosList } from '@/components/today/todos-list'
