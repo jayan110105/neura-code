@@ -3,6 +3,7 @@ import { db } from '@/db';
 import { reminders } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { sendWhatsappMessage } from '@/lib/utils';
+import { formatDateTime, formatDate } from '@/lib/utils';
 
 function shouldSendReminder(reminder: any, currentDate: string, currentTime: string, istTime: Date): boolean {
   if (!reminder.enabled) {
@@ -108,9 +109,9 @@ async function processReminders() {
         continue;
       }
 
-      const scheduledDateTime = reminder.time 
-        ? `${reminder.date} at ${reminder.time}`
-        : reminder.date;
+      const scheduledDateTime = reminder.time && reminder.date
+        ? `${formatDateTime(reminder.date, reminder.time)}`
+        : reminder.date ? formatDate(reminder.date) : 'Unknown date';
       
       const repeatInfo = reminder.repeat !== 'None' ? ` (${reminder.repeat})` : '';
       const message = `🔔 *Reminder*${repeatInfo}\n\n${reminder.title}${reminder.description ? `\n\n${reminder.description}` : ''}\n\n_Originally scheduled for ${scheduledDateTime}_`;
@@ -137,24 +138,17 @@ async function processReminders() {
 }
 
 export async function POST(request: Request) {
-  console.log('Process endpoint called - starting reminder processing');
-  
   try {
     const { searchParams } = new URL(request.url);
     const token = searchParams.get('token');
     
-    console.log(`Process endpoint token check: ${token ? 'token provided' : 'no token'}`);
-    
     if (process.env.CRON_SECRET_TOKEN && token !== process.env.CRON_SECRET_TOKEN) {
-      console.log('Process endpoint: Unauthorized - token mismatch');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    console.log('Starting reminder processing...');
     const result = await processReminders();
     
     if (result.success) {
-      console.log(`Reminder processing completed successfully. Processed: ${result.processed}`);
       return NextResponse.json({ 
         status: 'completed', 
         message: `Reminder processing completed successfully`,
@@ -162,7 +156,6 @@ export async function POST(request: Request) {
         timestamp: new Date().toISOString()
       });
     } else {
-      console.error('Reminder processing failed:', result.error);
       return NextResponse.json({ 
         status: 'failed', 
         message: 'Reminder processing failed',

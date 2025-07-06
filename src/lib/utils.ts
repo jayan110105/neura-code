@@ -48,3 +48,22 @@ export async function sendWhatsappMessage(to: string, text: string) {
     console.error('Failed to send WhatsApp message:', error);
   }
 }
+
+export function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    timeZone: 'Asia/Kolkata'
+  };
+  return date.toLocaleDateString('en-US', options);
+}
+
+export function formatDateTime(dateString: string, timeString: string): string {
+  const formattedDate = formatDate(dateString);
+  const formattedTime = formatTime(timeString);
+  
+  return `${formattedDate} at ${formattedTime}`;
+}

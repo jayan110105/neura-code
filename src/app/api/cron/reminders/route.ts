@@ -11,23 +11,21 @@ export async function GET(request: Request) {
 
     const baseUrl = process.env.NEXT_PUBLIC_URL
     
-    const processUrl = `${baseUrl}/api/cron/reminders/process${token ? `?token=${token}` : ''}`;
+    if (!baseUrl) {
+      return NextResponse.json({ 
+        status: 'error', 
+        message: 'Base URL not configured',
+        timestamp: new Date().toISOString()
+      }, { status: 500 });
+    }
     
-    console.log(`Triggering process endpoint: ${processUrl}`);
+    const processUrl = `${baseUrl}/api/cron/reminders/process${token ? `?token=${token}` : ''}`;
     
     fetch(processUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-    }).then(async (response) => {
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Process endpoint succeeded:', data);
-      } else {
-        const errorText = await response.text();
-        console.error(`Process endpoint failed: ${response.status} - ${errorText}`);
-      }
     }).catch((error) => {
       console.error('Failed to trigger reminder processing:', error);
     });
@@ -35,7 +33,6 @@ export async function GET(request: Request) {
     return NextResponse.json({ 
       status: 'accepted', 
       message: 'Reminder processing triggered',
-      processUrl,
       timestamp: new Date().toISOString()
     });
   } catch (error) {
