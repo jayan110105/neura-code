@@ -7,12 +7,12 @@ import {
 } from '@/components/ui/sidebar'
 
 export function PageContainer({ children }: { children: React.ReactNode }) {
-  const { open } = useSidebar()
+  const { open, isMobile } = useSidebar()
 
   return (
     <SidebarInset>
       <div className="flex h-[55px] items-center px-4">
-        {!open && <SidebarTrigger />}
+        {(isMobile || !open) && <SidebarTrigger />}
       </div>
       <main className="flex-1">{children}</main>
     </SidebarInset>

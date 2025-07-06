@@ -138,6 +138,7 @@ export async function deleteTodo(id: number) {
 export async function createTodoFromAgent(
   userId: string,
   title: string,
+  priority: 'High' | 'Medium' | 'Low',
   dueDate?: string,
 ) {
   const [newTodo] = await db
@@ -145,13 +146,13 @@ export async function createTodoFromAgent(
     .values({
       userId,
       title,
-      priority: 'Medium',
+      priority,
       dueDate: dueDate ? new Date(dueDate) : undefined,
     })
     .returning()
 
   try {
-    const embeddingContent = prepareTextForEmbedding('Medium', title)
+    const embeddingContent = prepareTextForEmbedding(priority, title)
     await storeEmbedding(userId, embeddingContent, 'todo', newTodo.id)
   } catch (error) {
     console.error('Error storing embedding for todo:', error)

@@ -25,13 +25,15 @@ export const getWhatsappTools = (userId: string) => {
           .describe(
             'The due date for the todo in YYYY-MM-DD format (e.g., "2024-07-26").',
           ),
+        priority: z.enum(['High', 'Medium', 'Low']).optional().describe('The priority of the todo.'),
       }),
-      execute: async ({ title, dueDate }) => {
-        await createTodoFromAgent(userId, title, dueDate)
+      execute: async ({ title, dueDate, priority }) => {
+        await createTodoFromAgent(userId, title, priority || 'Medium', dueDate)
+        const priorityText = priority && priority !== 'Medium' ? ` (${priority} priority)` : ''
         if (dueDate) {
-          return `Todo "${title}" created with due date ${dueDate}.`
+          return `Todo "${title}" created with due date ${dueDate}${priorityText}.`
         }
-        return `Todo "${title}" created.`
+        return `Todo "${title}" created${priorityText}.`
       },
     }),
     createBookmark: tool({
