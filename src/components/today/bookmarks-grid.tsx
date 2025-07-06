@@ -48,7 +48,7 @@ export function BookmarksGrid({
                   e.stopPropagation()
                   window.open(bookmark.url, '_blank', 'noopener,noreferrer')
                 }}
-                className="cursor-pointer absolute right-1.5 top-1.5 z-10 rounded-full p-1.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:bg-muted/50"
+                className="cursor-pointer absolute right-1.5 top-1.5 z-10 rounded-full p-1.5 text-muted-foreground transition-opacity hover:bg-muted/50 md:opacity-0 md:group-hover:opacity-100"
               >
                 <IconExternalLink className="h-4 w-4" />
               </button>

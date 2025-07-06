@@ -266,7 +266,7 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
           </p>
         </div>
         <Button
-          className="!h-10 px-3 py-2 text-sm"
+          className="!h-10 px-3 py-2 text-sm m-2"
           variant="outline"
           onClick={openCreateModal}
         >
@@ -298,7 +298,7 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-muted-foreground hover:text-destructive h-auto p-1 opacity-0 transition-opacity group-hover:opacity-100"
+                        className="text-muted-foreground hover:text-destructive h-auto p-1 transition-opacity md:opacity-0 md:group-hover:opacity-100"
                         onClick={(e) => {
                           e.stopPropagation()
                           handleDeleteReminder(reminder.id)
@@ -340,12 +340,14 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
                       />
                       {reminder.repeat}
                     </div>
-                    <div className="text-muted-foreground flex items-center gap-1 text-xs">
-                      <IconTagFilled
-                        className={`h-3 w-3 ${getCategoryColorClass(reminder.category)}`}
-                      />
-                      {reminder.category}
-                    </div>
+                    {reminder.category && (
+                      <div className="text-muted-foreground flex items-center gap-1 text-xs">
+                        <IconTagFilled
+                          className={`h-3 w-3 ${getCategoryColorClass(reminder.category)}`}
+                        />
+                        {reminder.category}
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>

@@ -158,7 +158,7 @@ export function DailyLogsSection({ dailyLogs }: DailyLogsSectionProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="text-muted-foreground opacity-0 hover:text-destructive group-hover:opacity-100"
+            className="text-muted-foreground hover:text-destructive transition-opacity md:opacity-0 md:group-hover:opacity-100"
             onClick={(e) => {
               e.stopPropagation()
               handleDelete(log.id)
@@ -183,7 +183,7 @@ export function DailyLogsSection({ dailyLogs }: DailyLogsSectionProps) {
           </p>
         </div>
         <Button
-          className="!h-10 px-3 py-2 text-sm"
+          className="!h-10 px-3 py-2 text-sm m-2"
           variant="outline"
           onClick={() => handleOpenDialog(null)}
         >

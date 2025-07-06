@@ -118,7 +118,7 @@ export function NotesSection({ notes }: { notes: Note[] }) {
           </p>
         </div>
         <Button
-          className="!h-10 px-3 py-2 text-sm"
+          className="!h-10 px-3 py-2 text-sm m-2"
           variant="outline"
           onClick={handleNewNote}
         >
@@ -142,7 +142,7 @@ export function NotesSection({ notes }: { notes: Note[] }) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-muted-foreground hover:text-destructive shrink-0 p-0 opacity-0 transition-opacity group-hover:opacity-100"
+                  className="text-muted-foreground hover:text-destructive shrink-0 p-0 transition-opacity md:opacity-0 md:group-hover:opacity-100"
                   onClick={(e) => {
                     e.stopPropagation()
                     handleDeleteNote(note.id)
