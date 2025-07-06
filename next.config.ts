@@ -7,7 +7,18 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  /* config options here */
+  output: 'standalone',
+  poweredByHeader: false,
+  compress: true,
+  
+  experimental: {
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', '@tabler/icons-react'],
+    serverMinification: true,
+  },
+  
+  images: {
+    formats: ['image/webp', 'image/avif'],
+  },
 }
 
 export default nextConfig

@@ -21,12 +21,13 @@ export default async function TodayPage() {
 
   const todayDate = new Date()
   todayDate.setHours(0, 0, 0, 0)
+  const todayTime = todayDate.getTime()
 
   const isToday = (date: Date | null | undefined) => {
     if (!date) return false
     const d = new Date(date)
     d.setHours(0, 0, 0, 0)
-    return d.getTime() === todayDate.getTime()
+    return d.getTime() === todayTime
   }
 
   const isReminderForToday = (reminder: Reminder) => {
@@ -36,8 +37,9 @@ export default async function TodayPage() {
 
     const reminderDate = new Date(reminder.date)
     reminderDate.setHours(0, 0, 0, 0)
+    const reminderTime = reminderDate.getTime()
 
-    if (reminderDate.getTime() > todayDate.getTime()) {
+    if (reminderTime > todayTime) {
       return false
     }
 
@@ -50,7 +52,7 @@ export default async function TodayPage() {
         return reminderDate.getDate() === todayDate.getDate()
       case 'None':
       default:
-        return reminderDate.getTime() === todayDate.getTime()
+        return reminderTime === todayTime
     }
   }
 
