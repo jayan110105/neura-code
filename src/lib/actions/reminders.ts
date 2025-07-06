@@ -7,6 +7,7 @@ import { revalidatePath } from 'next/cache'
 import { Reminder } from '@/types'
 import { cache } from 'react'
 import { getCachedSession } from '../session'
+import { formatLocalDate } from '../utils'
 
 export const getCachedReminders = cache(async (userId: string): Promise<Reminder[]> => {
   const userReminders = await db.query.reminders.findMany({
@@ -45,7 +46,7 @@ export async function createReminder(formData: {
     .insert(reminders)
     .values({
       ...formData,
-      date: formData.date ? formData.date.toISOString().split('T')[0] : null,
+      date: formData.date ? formatLocalDate(formData.date) : null,
       userId: session.user.id,
     })
     .returning()
@@ -78,7 +79,7 @@ export async function updateReminder(
     .update(reminders)
     .set({
       ...formData,
-      date: formData.date ? formData.date.toISOString().split('T')[0] : null,
+      date: formData.date ? formatLocalDate(formData.date) : null,
     })
     .where(and(eq(reminders.id, id), eq(reminders.userId, session.user.id)))
     .returning()
