@@ -40,6 +40,15 @@ export function TodosList({ todos, onTodoClick }: TodosListProps) {
 
   const sortedTodos = useMemo(() => {
     return [...optimisticTodos]
+      .filter((t) => {
+        if (t.completed) {
+          if (!t.dueDate) return false
+          const due = new Date(t.dueDate)
+          due.setHours(0, 0, 0, 0)
+          return due.getTime() >= todayTime
+        }
+        return true
+      })
       .map((t) => {
         if (!t.dueDate) return { ...t, _isOverdue: false, _sortKey: 2 }
         const due = new Date(t.dueDate)
