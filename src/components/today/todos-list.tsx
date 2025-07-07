@@ -11,6 +11,7 @@ import {
   IconAlarmFilled,
 } from '@tabler/icons-react'
 import { Todo } from '@/types'
+import { useMemo } from 'react'
 
 interface TodosListProps {
   todos: Todo[]
@@ -30,6 +31,29 @@ export function TodosList({ todos, onTodoClick }: TodosListProps) {
     optimisticReducer,
   )
   const [, startTransition] = useTransition()
+
+  const todayTime = (() => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    return today.getTime()
+  })()
+
+  const sortedTodos = useMemo(() => {
+    return [...optimisticTodos]
+      .map((t) => {
+        if (!t.dueDate) return { ...t, _isOverdue: false, _sortKey: 2 }
+        const due = new Date(t.dueDate)
+        due.setHours(0, 0, 0, 0)
+        const dueTime = due.getTime()
+        const isOverdue = dueTime < todayTime
+        const isToday = dueTime === todayTime
+        let sortKey = 2
+        if (isOverdue) sortKey = 0
+        else if (isToday) sortKey = 1
+        return { ...t, _isOverdue: isOverdue, _sortKey: sortKey }
+      })
+      .sort((a: any, b: any) => a._sortKey - b._sortKey)
+  }, [optimisticTodos, todayTime])
 
   if (optimisticTodos.length === 0) return null
 
@@ -77,7 +101,7 @@ export function TodosList({ todos, onTodoClick }: TodosListProps) {
       <Card className="bg-card border-none">
         <CardContent className="px-4">
           <div className="space-y-2">
-            {optimisticTodos.map((todo) => (
+            {sortedTodos.map((todo: any) => (
               <div
                 key={todo.id}
                 className="hover:bg-muted/50 flex cursor-pointer gap-3 rounded-md p-2 transition-colors"
@@ -105,6 +129,12 @@ export function TodosList({ todos, onTodoClick }: TodosListProps) {
                     {todo.title}
                   </h3>
                   <div className="mt-2 flex items-center gap-2">
+                    {todo._isOverdue && (
+                      <div className="text-destructive flex items-center gap-1 text-xs">
+                        <IconCalendarFilled className="mr-1 h-3 w-3" />
+                        Overdue
+                      </div>
+                    )}
                     {todo.priority && (
                       <div className="text-muted-foreground flex items-center gap-1 text-xs">
                         <IconFlagFilled
