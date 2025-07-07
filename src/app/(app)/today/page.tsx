@@ -7,7 +7,7 @@ import { getTodaysDailyLogs } from '@/lib/actions/daily-logs'
 import { getDailySummary } from '@/lib/actions/daily-summaries'
 import { TodaySection } from '@/components/today-section'
 import { Todo, Reminder, Note, Bookmark } from '@/types'
-import { formatLocalDate } from '@/lib/utils'
+import { formatLocalDate, getCurrentISTDate } from '@/lib/utils'
 
 export const metadata: Metadata = {
   title: 'Today',
@@ -26,7 +26,7 @@ export default async function TodayPage() {
     getDailySummary(today),
   ])
 
-  const todayDate = new Date()
+  const todayDate = getCurrentISTDate()
   todayDate.setHours(0, 0, 0, 0)
   const todayTime = todayDate.getTime()
 

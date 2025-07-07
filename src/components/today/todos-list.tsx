@@ -122,6 +122,7 @@ export function TodosList({ todos, onTodoClick }: TodosListProps) {
                           day: 'numeric',
                           month: 'short',
                           year: 'numeric',
+                          timeZone: 'Asia/Kolkata',
                         })}
                       </div>
                     )}

@@ -230,7 +230,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
       const dueDate = todo.dueDate ? new Date(todo.dueDate) : null
       const dueTime = dueDate ? dueDate.getTime() : null
       
-      if (todo.completed && dueTime && dueTime !== todayTime) {
+      if (todo.completed && (!dueTime || dueTime < todayTime)) {
         continue
       }
       
@@ -241,7 +241,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
           _isDueToday: dueTime === todayTime,
           _sortKey: dueTime ? (dueTime < todayTime ? 0 : 1) : 2
         } as Todo & { _isOverdue: boolean; _isDueToday: boolean; _sortKey: number })
-      } else if (!todo.completed && dueTime > todayTime) {
+      } else if (dueTime > todayTime) {
         upcomingResults.push(todo)
       }
     }
@@ -317,6 +317,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
                     day: 'numeric',
                     month: 'short',
                     year: 'numeric',
+                    timeZone: 'Asia/Kolkata',
                   })}
                 </div>
               )}

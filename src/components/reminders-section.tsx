@@ -325,6 +325,7 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
                             day: 'numeric',
                             month: 'short',
                             year: 'numeric',
+                            timeZone: 'Asia/Kolkata',
                           })}
                       </span>
                     </div>

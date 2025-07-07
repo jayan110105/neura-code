@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import { toZonedTime, fromZonedTime, format } from 'date-fns-tz'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -49,6 +50,8 @@ export async function sendWhatsappMessage(to: string, text: string) {
   }
 }
 
+const IST_TIMEZONE = 'Asia/Kolkata'
+
 export function formatDate(dateString: string): string {
   const date = new Date(dateString);
   const options: Intl.DateTimeFormatOptions = {
@@ -56,7 +59,7 @@ export function formatDate(dateString: string): string {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-    timeZone: 'Asia/Kolkata'
+    timeZone: IST_TIMEZONE
   };
   return date.toLocaleDateString('en-US', options);
 }
@@ -69,8 +72,10 @@ export function formatDateTime(dateString: string, timeString: string): string {
 }
 
 export function formatLocalDate(date: Date): string {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
+  const istDate = toZonedTime(date, IST_TIMEZONE)
+  return format(istDate, 'yyyy-MM-dd', { timeZone: IST_TIMEZONE })
+}
+
+export function getCurrentISTDate(): Date {
+  return toZonedTime(new Date(), IST_TIMEZONE)
 }

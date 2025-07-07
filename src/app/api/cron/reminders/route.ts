@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { db } from '@/db';
 import { reminders } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { sendWhatsappMessage, formatDateTime, formatDate } from '@/lib/utils';
+import { sendWhatsappMessage, formatDateTime, formatDate, getCurrentISTDate, formatLocalDate } from '@/lib/utils';
+import { toZonedTime } from 'date-fns-tz';
 
 function shouldSendReminder(reminder: any, currentDate: string, currentTime: string, istTime: Date): boolean {
   if (!reminder.enabled) {
@@ -28,8 +29,8 @@ function shouldSendReminder(reminder: any, currentDate: string, currentTime: str
     case 'Daily':
       shouldSend = reminderTime <= currentTime;
       if (shouldSend && lastSent) {
-        const lastSentIST = new Date(lastSent.toLocaleString("en-US", {timeZone: "Asia/Kolkata"}));
-        const lastSentDate = lastSentIST.toISOString().split('T')[0];
+        const lastSentIST = toZonedTime(lastSent, 'Asia/Kolkata');
+        const lastSentDate = formatLocalDate(lastSentIST);
         shouldSend = lastSentDate !== currentDate;
         console.log(`Daily repeat: timeMatch=${reminderTime <= currentTime}, lastSentDate=${lastSentDate}, currentDate=${currentDate}, shouldSend=${shouldSend}`);
       } else {
@@ -55,7 +56,7 @@ function shouldSendReminder(reminder: any, currentDate: string, currentTime: str
       const currentDay = istTime.getDate();
       shouldSend = reminderDay === currentDay && reminderTime <= currentTime;
       if (shouldSend && lastSent) {
-        const lastSentIST = new Date(lastSent.toLocaleString("en-US", {timeZone: "Asia/Kolkata"}));
+        const lastSentIST = toZonedTime(lastSent, 'Asia/Kolkata');
         const lastSentMonth = lastSentIST.getMonth();
         const lastSentYear = lastSentIST.getFullYear();
         const currentMonth = istTime.getMonth();
@@ -78,11 +79,10 @@ function shouldSendReminder(reminder: any, currentDate: string, currentTime: str
 
 async function processReminders() {
   try {
-    const now = new Date();
-    const istTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Kolkata"}));
+    const istTime = getCurrentISTDate();
     
-    const currentDate = istTime.toISOString().split('T')[0]; // YYYY-MM-DD
-    const currentTime = istTime.toTimeString().split(' ')[0]; // HH:MM:SS
+    const currentDate = formatLocalDate(istTime);
+    const currentTime = istTime.toTimeString().split(' ')[0];
     
     console.log(`Processing reminders at ${currentDate} ${currentTime} (IST)`);
     

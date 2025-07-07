@@ -4,7 +4,7 @@ import { generateText } from 'ai';
 import { getUserByPhoneNumber } from '@/lib/auth';
 import { getWhatsappTools } from '@/lib/whatsapp-tools';
 import { storeMessage, getConversationHistory } from '@/lib/actions/messages';
-import { sendWhatsappMessage } from '@/lib/utils';
+import { sendWhatsappMessage, getCurrentISTDate, formatLocalDate } from '@/lib/utils';
 
 const google = createGoogleGenerativeAI({
   apiKey: process.env.GOOGLE_API_KEY,
@@ -53,12 +53,22 @@ export async function POST(req: Request) {
 
     const conversationHistory = await getConversationHistory(user.id, 10);
     
+    const currentISTDate = getCurrentISTDate();
+    const todayFormatted = formatLocalDate(currentISTDate);
+    const todayLongFormat = currentISTDate.toLocaleDateString('en-US', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      timeZone: 'Asia/Kolkata'
+    });
+    
     const messages = [
       {
         role: 'system' as const,
         content: `You are Neura, a personal AI assistant integrated into WhatsApp. You're friendly, helpful, and speak naturally like a trusted personal assistant would.
 
-The current date is ${new Date().toLocaleDateString('en-CA')} (today is ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}).
+The current date is ${todayFormatted} (today is ${todayLongFormat}).
 
 You have access to the following tools:
 - createTodo: Creates a new todo item for tasks and plans. This is your default choice for actionable items. You can optionally provide a due date and priority level.
