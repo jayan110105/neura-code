@@ -407,6 +407,7 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
                 onDateChange={(date) =>
                   setFormData((prev) => ({ ...prev, date: date }))
                 }
+                disablePastDates={true}
               />
               <Select
                 value={formData.time}

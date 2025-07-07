@@ -1,5 +1,6 @@
 'use client'
 
+import { type Metadata } from 'next'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -8,6 +9,11 @@ import { Label } from '@/components/ui/label'
 import Link from 'next/link'
 import { authClient } from '@/lib/auth-client'
 import { IconLoader2 } from '@tabler/icons-react'
+
+export const metadata: Metadata = {
+  title: 'Sign Up',
+  description: 'Create your Neura-Code account and start organizing your productivity with AI-powered tools.',
+}
 
 export default function SignUpPage() {
   const router = useRouter()

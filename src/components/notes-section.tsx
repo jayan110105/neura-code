@@ -206,17 +206,19 @@ export function NotesSection({ notes }: { notes: Note[] }) {
               placeholder={'Take a note...'}
               className="min-h-[300px] resize-none border-none outline-none focus-visible:border-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
             />
+            <div className="flex gap-2 justify-end">
+              <Button variant="ghost" onClick={() => setIsEditDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSaveNote}
+                disabled={!editForm.title.trim()}
+                variant="outline"
+              >
+                {editingNote ? 'Save' : 'Add note'}
+              </Button>
+            </div>
           </div>
-
-          <DialogFooter className="gap-2">
-            <Button
-              onClick={handleSaveNote}
-              variant="ghost"
-              className="text-foreground hover:text-foreground"
-            >
-              Save
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

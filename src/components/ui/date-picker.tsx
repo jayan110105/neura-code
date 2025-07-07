@@ -21,6 +21,7 @@ interface DatePickerProps {
   className?: string
   showLabel?: boolean
   label?: string
+  disablePastDates?: boolean
 }
 
 export function DatePicker({
@@ -30,6 +31,7 @@ export function DatePicker({
   className,
   showLabel = false,
   label = 'Date of birth',
+  disablePastDates = false,
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false)
 
@@ -64,6 +66,7 @@ export function DatePicker({
             mode="single"
             selected={selectedDate}
             captionLayout="dropdown"
+            disabled={disablePastDates ? { before: new Date() } : undefined}
             onSelect={(date) => {
               onDateChange?.(date)
               setOpen(false)
