@@ -426,7 +426,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
                 }
                 placeholder="Pick a date"
                 showLabel={false}
-                // disablePastDates={true}
+                disablePastDates={true}
               />
               <Select
                 value={formData.priority}
