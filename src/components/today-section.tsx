@@ -8,7 +8,7 @@ import { RemindersList } from '@/components/today/reminders-list'
 import { DailyLogsSummary } from '@/components/today/daily-logs-summary'
 import { Todo, Reminder, Note, Bookmark, DailyLog, DailySummary } from '@/types'
 
-type TodaySectionProps = {
+interface TodaySectionProps {
   todos: Todo[]
   reminders: Reminder[]
   notes: Note[]

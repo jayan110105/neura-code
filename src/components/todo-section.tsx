@@ -1,6 +1,6 @@
 'use client'
 
-import { useOptimistic, useTransition, useState, useEffect } from 'react'
+import { useOptimistic, useTransition, useState, useEffect, useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
 import {
   createTodo,
@@ -64,6 +64,18 @@ function optimisticReducer(
   }
 }
 
+const REMINDER_OPTIONS: string[] = (() => {
+  const options: string[] = []
+  for (let hour = 0; hour < 24; hour++) {
+    for (let minute = 0; minute < 60; minute += 15) {
+      const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
+      const ampm = hour < 12 ? 'AM' : 'PM'
+      options.push(`${hour12}:${minute.toString().padStart(2, '0')} ${ampm}`)
+    }
+  }
+  return options
+})()
+
 export function TodoSection({ todos }: { todos: Todo[] }) {
   const [optimisticTodos, addOptimisticTodo] = useOptimistic(
     todos,
@@ -97,23 +109,6 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
       }
     }
   }, [searchParams, todos])
-
-  const generateReminderOptions = () => {
-    const options = []
-    for (let hour = 0; hour < 24; hour++) {
-      for (let minute = 0; minute < 60; minute += 15) {
-        const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
-        const ampm = hour < 12 ? 'AM' : 'PM'
-        const timeString = `${hour12}:${minute
-          .toString()
-          .padStart(2, '0')} ${ampm}`
-        options.push(timeString)
-      }
-    }
-    return options
-  }
-
-  const reminderOptions = generateReminderOptions()
 
   const openCreateModal = () => {
     setIsEditMode(false)
@@ -223,25 +218,43 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
     }
   }
 
-  const todayTodos = optimisticTodos
-    .filter(
-      (todo) =>
-        !todo.dueDate ||
-        new Date(todo.dueDate).toDateString() === new Date().toDateString(),
-    )
-    .sort((a, b) => {
-      const aHasToday = a.dueDate && new Date(a.dueDate).toDateString() === new Date().toDateString()
-      const bHasToday = b.dueDate && new Date(b.dueDate).toDateString() === new Date().toDateString()
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const todayTime = today.getTime()
+
+  const { todayTodos, upcomingTodos } = useMemo(() => {
+    const todayResults: Todo[] = []
+    const upcomingResults: Todo[] = []
+    
+    for (const todo of optimisticTodos) {
+      const dueDate = todo.dueDate ? new Date(todo.dueDate) : null
+      const dueTime = dueDate ? dueDate.getTime() : null
       
-      if (aHasToday && !bHasToday) return -1
-      if (!aHasToday && bHasToday) return 1
-      return 0
-    })
-  const upcomingTodos = optimisticTodos.filter(
-    (todo) =>
-      todo.dueDate &&
-      new Date(todo.dueDate).toDateString() !== new Date().toDateString(),
-  )
+      if (todo.completed && dueTime && dueTime !== todayTime) {
+        continue
+      }
+      
+      if (!dueTime || dueTime <= todayTime) {
+        todayResults.push({
+          ...todo,
+          _isOverdue: dueTime ? dueTime < todayTime : false,
+          _isDueToday: dueTime === todayTime,
+          _sortKey: dueTime ? (dueTime < todayTime ? 0 : 1) : 2
+        } as Todo & { _isOverdue: boolean; _isDueToday: boolean; _sortKey: number })
+      } else if (!todo.completed && dueTime > todayTime) {
+        upcomingResults.push(todo)
+      }
+    }
+    
+    todayResults.sort((a, b) => (a as any)._sortKey - (b as any)._sortKey)
+    
+    return {
+      todayTodos: todayResults,
+      upcomingTodos: upcomingResults
+    }
+  }, [optimisticTodos, todayTime])
+  
+  const isOverdue = (todo: Todo) => (todo as any)._isOverdue
 
   const TodoItem = ({ todo }: { todo: Todo }) => (
     <Card
@@ -273,6 +286,12 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
               {todo.title}
             </h3>
             <div className="mt-2 flex items-center gap-2">
+              {isOverdue(todo) && (
+                <div className="text-destructive flex items-center gap-1 text-xs">
+                  <IconCalendarFilled className="mr-1 h-3 w-3" />
+                  Overdue
+                </div>
+              )}
               <div className="text-muted-foreground flex items-center gap-1 text-xs">
                 <IconFlagFilled
                   className={`mr-1 h-3 w-3 ${getPriorityIconColor(
@@ -407,7 +426,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
                 }
                 placeholder="Pick a date"
                 showLabel={false}
-                disablePastDates={true}
+                // disablePastDates={true}
               />
               <Select
                 value={formData.priority}
@@ -500,7 +519,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
                     <SelectValue placeholder="00:00" />
                   </SelectTrigger>
                   <SelectContent className="max-h-60">
-                    {reminderOptions.map((time) => (
+                    {REMINDER_OPTIONS.map((time) => (
                       <SelectItem key={time} value={time} className="text-xs">
                         {time}
                       </SelectItem>

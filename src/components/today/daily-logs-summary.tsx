@@ -1,12 +1,31 @@
+'use client'
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { IconNote } from '@tabler/icons-react'
+import { IconNote, IconSparkles, IconLoader2 } from '@tabler/icons-react'
 import type { DailyLog, DailySummary } from '@/types'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { generateTodaysSummaryAction } from '@/lib/actions/daily-summaries'
+import { useFormStatus } from 'react-dom'
 
 interface DailyLogsSummaryProps {
   dailyLogs: DailyLog[]
   dailySummary: DailySummary | null
+}
+
+function GenerateButton({ hasExistingSummary }: { hasExistingSummary: boolean }) {
+  const { pending } = useFormStatus()
+  
+  return (
+    <Button type="submit" size="sm" variant="outline" disabled={pending}>
+      {pending ? (
+        <IconLoader2 className="h-4 w-4 mr-2 animate-spin" />
+      ) : (
+        <IconSparkles className="h-4 w-4 mr-2" />
+      )}
+      {pending ? 'Generating...' : hasExistingSummary ? 'Regenerate' : 'Generate'}
+    </Button>
+  )
 }
 
 export function DailyLogsSummary({ dailyLogs, dailySummary }: DailyLogsSummaryProps) {
@@ -18,9 +37,13 @@ export function DailyLogsSummary({ dailyLogs, dailySummary }: DailyLogsSummaryPr
             <IconNote className="h-5 w-5" />
             <CardTitle>Today's Logs</CardTitle>
           </div>
-          <Button asChild variant="link" className="text-sm">
-            <Link href="/daily-logs">View All</Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            {dailyLogs.length > 0 && (
+              <form action={generateTodaysSummaryAction}>
+                <GenerateButton hasExistingSummary={!!dailySummary?.summary} />
+              </form>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -28,7 +51,7 @@ export function DailyLogsSummary({ dailyLogs, dailySummary }: DailyLogsSummaryPr
           <p className="text-muted-foreground leading-relaxed">{dailySummary.summary}</p>
         ) : dailyLogs.length > 0 ? (
           <p className="text-muted-foreground text-sm">
-            Summary will be generated automatically when you add logs.
+            No summary generated yet for today's logs.
           </p>
         ) : (
           <p className="text-muted-foreground text-sm">No logs for today yet</p>

@@ -8,6 +8,7 @@ import { createDailyLogFromAgent } from '@/lib/actions/daily-logs'
 import { getContextualContent } from '@/lib/actions/embedding-actions'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { generateText } from 'ai'
+import { formatLocalDate } from './utils'
 
 const google = createGoogleGenerativeAI({
   apiKey: process.env.GOOGLE_API_KEY,
@@ -90,7 +91,7 @@ export const getWhatsappTools = (userId: string) => {
       }),
       execute: async ({ description }) => {
         const today = new Date()
-        const date = today.toISOString().split('T')[0]
+        const date = formatLocalDate(today)
         const formattedDate = today.toLocaleDateString('en-US', {
           month: 'long',
           day: 'numeric',

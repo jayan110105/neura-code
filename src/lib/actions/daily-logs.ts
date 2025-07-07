@@ -6,9 +6,9 @@ import { eq, and, desc } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { cache } from 'react'
 import { getCachedSession } from '../session'
-import { createOrUpdateDailySummary } from './daily-summaries'
 import { storeEmbedding, deleteEmbedding } from './embedding-actions'
 import { prepareTextForEmbedding } from '../embedding-service'
+import { formatLocalDate } from '../utils'
 
 export const getCachedDailyLogs = cache(async (userId: string) => {
   const userDailyLogs = await db.query.dailyLogs.findMany({
@@ -27,22 +27,6 @@ export const getCachedDailyLogsForDate = cache(async (userId: string, date: stri
   })
   return logsForDate
 })
-
-async function updateSummaryInBackground(date: string, userId: string) {
-  Promise.resolve().then(async () => {
-    try {
-      const logsForDate = await getCachedDailyLogsForDate(userId, date)
-      
-      const descriptions = logsForDate.map(log => log.description)
-      
-      if (descriptions.length > 0) {
-        await createOrUpdateDailySummary(date, descriptions)
-      }
-    } catch (error) {
-      console.error('Background summary update failed:', error)
-    }
-  })
-}
 
 export async function getDailyLogs() {
   const session = await getCachedSession()
@@ -77,8 +61,6 @@ export async function createDailyLog(formData: {
   } catch (error) {
     console.error('Error storing embedding for daily log:', error)
   }
-
-  updateSummaryInBackground(formData.date, session.user.id)
 
   revalidatePath('/')
   revalidatePath('/daily-logs')
@@ -117,8 +99,6 @@ export async function updateDailyLog(
     console.error('Error updating embedding for daily log:', error)
   }
 
-  updateSummaryInBackground(formData.date, session.user.id)
-
   revalidatePath('/')
   revalidatePath('/daily-logs')
   revalidatePath('/today')
@@ -148,10 +128,6 @@ export async function deleteDailyLog(id: number) {
     console.error('Error deleting embedding for daily log:', error)
   }
 
-  if (logToDelete) {
-    updateSummaryInBackground(logToDelete.date, session.user.id)
-  }
-
   revalidatePath('/')
   revalidatePath('/daily-logs')
   revalidatePath('/today')
@@ -175,7 +151,7 @@ export async function getTodaysDailyLogs() {
     return []
   }
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = formatLocalDate(new Date())
   return getCachedTodaysDailyLogs(session.user.id, today)
 }
 
@@ -199,8 +175,6 @@ export async function createDailyLogFromAgent(
   } catch (error) {
     console.error('Error storing embedding for daily log:', error)
   }
-
-  updateSummaryInBackground(date, userId)
 
   revalidatePath('/')
   revalidatePath('/today')

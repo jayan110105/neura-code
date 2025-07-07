@@ -1,14 +1,13 @@
 'use client'
 
 import { useState, useOptimistic, useTransition } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from '@/components/ui/dialog'
 import {
   IconPlus,
@@ -27,6 +26,7 @@ import type { DailyLog } from '@/types'
 import { DatePicker } from './ui/date-picker'
 import TextareaAutosize from 'react-textarea-autosize'
 import { isToday, isYesterday, isThisWeek, parseISO } from 'date-fns'
+import { formatLocalDate } from '@/lib/utils'
 
 interface DailyLogsSectionProps {
   dailyLogs: DailyLog[]
@@ -83,7 +83,7 @@ export function DailyLogsSection({ dailyLogs }: DailyLogsSectionProps) {
     setIsDialogOpen(false)
 
     const data = {
-      date: editForm.date.toISOString().split('T')[0],
+      date: formatLocalDate(editForm.date),
       description: editForm.description || null,
     }
 

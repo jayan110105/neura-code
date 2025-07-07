@@ -77,6 +77,18 @@ function optimisticReducer(
   }
 }
 
+const TIME_OPTIONS: string[] = (() => {
+  const opts: string[] = []
+  for (let hour = 0; hour < 24; hour++) {
+    for (const minute of [0, 15, 30, 45]) {
+      const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
+      const ampm = hour < 12 ? 'AM' : 'PM'
+      opts.push(`${hour12}:${minute.toString().padStart(2, '0')} ${ampm}`)
+    }
+  }
+  return opts
+})()
+
 export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
   const [optimisticReminders, addOptimisticReminder] = useOptimistic(
     reminders,
@@ -106,20 +118,6 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
       }
     }
   }, [searchParams, reminders])
-
-  const generateTimeOptions = () => {
-    const options = []
-    for (let hour = 0; hour < 24; hour++) {
-      for (const minute of [0, 15, 30, 45]) {
-        const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
-        const ampm = hour < 12 ? 'AM' : 'PM'
-        const timeString = `${hour12}:${minute.toString().padStart(2, '0')} ${ampm}`
-        options.push(timeString)
-      }
-    }
-    return options
-  }
-  const timeOptions = generateTimeOptions()
 
   const openCreateModal = () => {
     setEditingReminder(null)
@@ -423,7 +421,7 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
                   <SelectValue placeholder="Time" />
                 </SelectTrigger>
                 <SelectContent className="max-h-60">
-                  {timeOptions.map((time) => (
+                  {TIME_OPTIONS.map((time) => (
                     <SelectItem key={time} value={time} className="text-xs">
                       {time}
                     </SelectItem>
