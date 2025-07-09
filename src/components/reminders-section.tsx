@@ -36,7 +36,7 @@ import {
 } from '@tabler/icons-react'
 import TextareaAutosize from 'react-textarea-autosize'
 import { Reminder } from '@/types'
-import { formatTime } from '@/lib/utils'
+import { formatTime, to24HourFormat } from '@/lib/utils'
 
 type ReminderForm = {
   title: string
@@ -147,19 +147,6 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
   const closeModal = () => {
     setIsModalOpen(false)
     setEditingReminder(null)
-  }
-
-  const to24HourFormat = (time: string | null): string | null => {
-    if (!time) return null
-    const [hourMinute, period] = time.split(' ')
-    const [parsedHour, minute] = hourMinute.split(':').map(Number)
-    let hour = parsedHour
-    if (period.toLowerCase() === 'pm' && hour !== 12) {
-      hour += 12
-    } else if (period.toLowerCase() === 'am' && hour === 12) {
-      hour = 0
-    }
-    return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00`
   }
 
   const handleSaveReminder = async () => {

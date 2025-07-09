@@ -37,7 +37,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Todo } from '@/types'
-import { formatTime } from '@/lib/utils'
+import { formatTime, to24HourFormat } from '@/lib/utils'
 
 type Action =
   | { type: 'add'; todo: Todo }
@@ -131,7 +131,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
       dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
       priority: task.priority || 'Medium',
       category: task.category || null,
-      reminderTime: task.reminderTime || '',
+      reminderTime: formatTime(task.reminderTime) || '',
     })
     setIsCreateModalOpen(true)
   }
@@ -147,7 +147,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
         title: formData.title,
         priority: formData.priority,
         dueDate: formData.dueDate,
-        reminderTime: formData.reminderTime,
+        reminderTime: to24HourFormat(formData.reminderTime) || undefined,
         completed: editingTask.completed,
         category: formData.category,
       }
@@ -156,7 +156,10 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
           type: 'update',
           todo: updatedTodo as unknown as Todo,
         })
-        await updateTodo(editingTask.id, formData)
+        await updateTodo(editingTask.id, {
+          ...formData,
+          reminderTime: to24HourFormat(formData.reminderTime) ?? undefined,
+        })
       })
     } else {
       const newTodo = {
@@ -164,7 +167,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
         title: formData.title,
         priority: formData.priority,
         dueDate: formData.dueDate,
-        reminderTime: formData.reminderTime,
+        reminderTime: to24HourFormat(formData.reminderTime) || undefined,
         category: formData.category,
         completed: false,
         userId: '',
@@ -172,7 +175,10 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
       }
       startTransition(async () => {
         addOptimisticTodo({ type: 'add', todo: newTodo as Todo })
-        await createTodo(formData)
+        await createTodo({
+          ...formData,
+          reminderTime: to24HourFormat(formData.reminderTime) ?? undefined,
+        })
       })
     }
   }
@@ -510,9 +516,9 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
 
               <div>
                 <Select
-                  value={formData.reminderTime}
+                  value={formData.reminderTime || 'none'}
                   onValueChange={(value: string) =>
-                    setFormData((prev) => ({ ...prev, reminderTime: value }))
+                    setFormData((prev) => ({ ...prev, reminderTime: value === 'none' ? '' : value }))
                   }
                 >
                   <SelectTrigger
@@ -523,6 +529,9 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
                     <SelectValue placeholder="00:00" />
                   </SelectTrigger>
                   <SelectContent className="max-h-60">
+                    <SelectItem value="none" className="text-xs">
+                      <span className="text-muted-foreground">None</span>
+                    </SelectItem>
                     {REMINDER_OPTIONS.map((time) => (
                       <SelectItem key={time} value={time} className="text-xs">
                         {time}

@@ -23,6 +23,19 @@ export function formatTime(timeString: string | null) {
   return `${formattedHour}:${formattedMinutes} ${ampm}`
 }
 
+export function to24HourFormat(time: string | null): string | null {
+  if (!time) return null
+  const [hourMinute, period] = time.split(' ')
+  const [parsedHour, minute] = hourMinute.split(':').map(Number)
+  let hour = parsedHour
+  if (period.toLowerCase() === 'pm' && hour !== 12) {
+    hour += 12
+  } else if (period.toLowerCase() === 'am' && hour === 12) {
+    hour = 0
+  }
+  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00`
+}
+
 export async function sendWhatsappMessage(to: string, text: string) {
   const whatsappApiToken = process.env.WHATSAPP_API_TOKEN;
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
