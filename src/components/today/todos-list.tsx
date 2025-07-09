@@ -12,6 +12,7 @@ import {
 } from '@tabler/icons-react'
 import { Todo } from '@/types'
 import { useMemo } from 'react'
+import { formatTime } from '@/lib/utils'
 
 interface TodosListProps {
   todos: Todo[]
@@ -137,7 +138,7 @@ export function TodosList({ todos, onTodoClick }: TodosListProps) {
                   >
                     {todo.title}
                   </h3>
-                  <div className="mt-2 flex items-center gap-2">
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
                     {todo._isOverdue && (
                       <div className="text-destructive flex items-center gap-1 text-xs">
                         <IconCalendarFilled className="mr-1 h-3 w-3" />
@@ -160,7 +161,6 @@ export function TodosList({ todos, onTodoClick }: TodosListProps) {
                         {new Date(todo.dueDate).toLocaleDateString('en-GB', {
                           day: 'numeric',
                           month: 'short',
-                          year: 'numeric',
                           timeZone: 'Asia/Kolkata',
                         })}
                       </div>
@@ -168,7 +168,7 @@ export function TodosList({ todos, onTodoClick }: TodosListProps) {
                     {todo.reminderTime && (
                       <div className="text-muted-foreground flex items-center gap-1 text-xs">
                         <IconAlarmFilled className="h-3 w-3" />
-                        {todo.reminderTime}
+                        {formatTime(todo.reminderTime)}
                       </div>
                     )}
                     {todo.category && (

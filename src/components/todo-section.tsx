@@ -37,6 +37,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Todo } from '@/types'
+import { formatTime } from '@/lib/utils'
 
 type Action =
   | { type: 'add'; todo: Todo }
@@ -285,7 +286,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
             >
               {todo.title}
             </h3>
-            <div className="mt-2 flex items-center gap-2">
+            <div className="mt-2 flex flex-wrap items-center gap-2">
               {isOverdue(todo) && (
                 <div className="text-destructive flex items-center gap-1 text-xs">
                   <IconCalendarFilled className="mr-1 h-3 w-3" />
@@ -316,7 +317,6 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
                   {new Date(todo.dueDate).toLocaleDateString('en-GB', {
                     day: 'numeric',
                     month: 'short',
-                    year: 'numeric',
                     timeZone: 'Asia/Kolkata',
                   })}
                 </div>
@@ -324,7 +324,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
               {todo.reminderTime && (
                 <div className="text-muted-foreground flex items-center gap-1 text-xs">
                   <IconAlarmFilled className="h-3 w-3" />
-                  {todo.reminderTime}
+                  {formatTime(todo.reminderTime)}
                 </div>
               )}
             </div>
