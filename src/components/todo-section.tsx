@@ -97,7 +97,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
   }>({
     title: '',
     priority: 'Medium',
-    category: 'Work',
+    category: null,
     reminderTime: '',
   })
 
@@ -117,7 +117,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
     setFormData({
       title: '',
       priority: 'Medium',
-      category: 'Work',
+      category: null,
       reminderTime: '',
     })
     setIsCreateModalOpen(true)
@@ -130,7 +130,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
       title: task.title,
       dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
       priority: task.priority || 'Medium',
-      category: task.category || 'Work',
+      category: task.category || null,
       reminderTime: task.reminderTime || '',
     })
     setIsCreateModalOpen(true)
@@ -184,7 +184,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
     setFormData({
       title: '',
       priority: 'Medium',
-      category: 'Work',
+      category: null,
       reminderTime: '',
     })
   }
@@ -461,11 +461,11 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
               </Select>
 
               <Select
-                value={formData.category || undefined}
+                value={formData.category || 'none'}
                 onValueChange={(value) =>
                   setFormData((prev) => ({
                     ...prev,
-                    category: value as 'Work' | 'Health' | 'Personal' | 'Finance' | null,
+                    category: value === 'none' ? null : value as 'Work' | 'Health' | 'Personal' | 'Finance' | null,
                   }))
                 }
               >
@@ -476,6 +476,9 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="none" className="text-xs">
+                    <span className="text-muted-foreground">None</span>
+                  </SelectItem>
                   <SelectItem value="Work" className="text-xs">
                     <IconTagFilled
                       className={`h-3 w-3 ${getCategoryColorClass('Work')}`}
