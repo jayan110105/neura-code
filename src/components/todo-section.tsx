@@ -17,7 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
+import TextareaAutosize from 'react-textarea-autosize'
 import {
   IconPlus,
   IconCalendarFilled,
@@ -410,15 +410,16 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
           className="sm:max-w-[500px]"
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
-          <DialogHeader className="pb-4">
+          <DialogHeader>
             <DialogTitle className="text-left text-lg">
-              <Input
+              <TextareaAutosize
                 placeholder={isEditMode ? 'Edit task name' : 'Task name'}
                 value={formData.title}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, title: e.target.value }))
                 }
-                className="placeholder-muted-foreground h-auto border-none bg-transparent p-0 !text-lg focus-visible:ring-0"
+                className="placeholder-muted-foreground w-full resize-none border-none bg-transparent p-0 !text-lg outline-none focus:outline-none focus:ring-0 focus:ring-offset-0 whitespace-normal break-words"
+                minRows={1}
               />
             </DialogTitle>
           </DialogHeader>
