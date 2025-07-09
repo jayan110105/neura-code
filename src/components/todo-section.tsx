@@ -483,6 +483,9 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none" className="text-xs">
+                    <IconTagFilled
+                      className={'h-3 w-3 text-muted-foreground'}
+                    />
                     <span className="text-muted-foreground">None</span>
                   </SelectItem>
                   <SelectItem value="Work" className="text-xs">
