@@ -26,6 +26,8 @@ import {
   IconCopyCheckFilled,
   IconLogout,
   IconNotebook,
+  IconBrandX,
+  IconBrandXFilled,
 } from '@tabler/icons-react'
 import { authClient } from '@/lib/auth-client'
 import { useRouter, usePathname } from 'next/navigation'
@@ -81,6 +83,14 @@ const menuItems = [
     iconFilled: IconAlarmFilled,
     href: '/reminders',
   },
+  {
+    id: 'tweet-ideas',
+    title: 'Tweet Ideas',
+    icon: IconBrandX,
+    iconFilled: IconBrandXFilled,
+    href: '/tweet-ideas',
+  },
+
   {
     id: 'testing',
     title: 'Testing',

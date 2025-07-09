@@ -179,3 +179,41 @@ export const embeddingsRelations = relations(embeddings, ({ one }) => ({
     references: [user.id],
   }),
 }))
+
+export const tweetIdeas = pgTable('tweet_ideas', {
+  id: serial('id').primaryKey(),
+  content: text('content').notNull(),
+  sourceData: text('source_data'), // JSON string of the data that inspired this tweet
+  isUsed: boolean('is_used').default(false).notNull(),
+  generatedAt: timestamp('generated_at').defaultNow().notNull(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+})
+
+export const tweetIdeasRelations = relations(tweetIdeas, ({ one }) => ({
+  user: one(user, {
+    fields: [tweetIdeas.userId],
+    references: [user.id],
+  }),
+}))
+
+export const tweetStyleReferences = pgTable('tweet_style_references', {
+  id: serial('id').primaryKey(),
+  tweetText: text('tweet_text').notNull(),
+  tweetUrl: text('tweet_url'),
+  author: text('author'),
+  notes: text('notes'), // User's notes about why they like this style
+  isActive: boolean('is_active').default(true).notNull(),
+  addedAt: timestamp('added_at').defaultNow().notNull(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+})
+
+export const tweetStyleReferencesRelations = relations(tweetStyleReferences, ({ one }) => ({
+  user: one(user, {
+    fields: [tweetStyleReferences.userId],
+    references: [user.id],
+  }),
+}))
