@@ -26,6 +26,8 @@ import {
   IconCopyCheckFilled,
   IconLogout,
   IconNotebook,
+  IconApple,
+  IconAppleFilled,
 } from '@tabler/icons-react'
 import { authClient } from '@/lib/auth-client'
 import { useRouter, usePathname } from 'next/navigation'
@@ -80,6 +82,13 @@ const menuItems = [
     icon: IconAlarm,
     iconFilled: IconAlarmFilled,
     href: '/reminders',
+  },
+  {
+    id: 'calories',
+    title: 'Calories',
+    icon: IconApple,
+    iconFilled: IconAppleFilled,
+    href: '/calories',
   },
   {
     id: 'testing',

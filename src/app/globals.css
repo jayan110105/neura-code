@@ -147,3 +147,13 @@ input:-webkit-autofill:active {
   border: 1px solid var(--input) !important;
   transition: background-color 5000s ease-in-out 0s;
 }
+
+/* Hide spinner arrows from number inputs */
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type='number'] {
+  -moz-appearance: textfield;
+}

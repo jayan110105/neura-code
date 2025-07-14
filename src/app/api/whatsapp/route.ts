@@ -34,7 +34,7 @@ export async function POST(req: Request) {
 
     const message = body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
 
-    if (!message || !message.text?.body) {
+    if (!message) {
       return NextResponse.json({ status: 'success' }, { status: 200 });
     }
 

@@ -137,7 +137,7 @@ export const dailySummaries = pgTable('daily_summaries', {
 export const messages = pgTable('messages', {
   id: serial('id').primaryKey(),
   content: text('content').notNull(),
-  role: text('role').notNull(), // 'user' or 'assistant'
+  role: text('role').notNull(),
   userId: text('user_id')
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),
@@ -176,6 +176,80 @@ export const embeddings = pgTable('embeddings', {
 export const embeddingsRelations = relations(embeddings, ({ one }) => ({
   user: one(user, {
     fields: [embeddings.userId],
+    references: [user.id],
+  }),
+}))
+
+export const mealTypeEnum = pgEnum('meal_type', [
+  'Breakfast',
+  'Lunch',
+  'Dinner', 
+  'Snack',
+  'Other',
+])
+
+export const foodEntries = pgTable('food_entries', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  calories: integer('calories').notNull(),
+  protein: integer('protein'),
+  carbs: integer('carbs'),
+  fat: integer('fat'),
+  quantity: integer('quantity').default(1).notNull(),
+  unit: text('unit').default('serving').notNull(),
+  mealType: mealTypeEnum('meal_type').notNull(),
+  notes: text('notes'),
+  date: date('date').notNull(),
+  timestamp: timestamp('timestamp').defaultNow().notNull(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+})
+
+export const foodEntriesRelations = relations(foodEntries, ({ one }) => ({
+  user: one(user, {
+    fields: [foodEntries.userId],
+    references: [user.id],
+  }),
+}))
+
+export const dailyNutritionSummaries = pgTable('daily_nutrition_summaries', {
+  id: serial('id').primaryKey(),
+  date: date('date').notNull(),
+  totalCalories: integer('total_calories').default(0).notNull(),
+  totalProtein: integer('total_protein').default(0).notNull(),
+  totalCarbs: integer('total_carbs').default(0).notNull(),
+  totalFat: integer('total_fat').default(0).notNull(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
+
+export const nutritionGoals = pgTable('nutrition_goals', {
+  id: serial('id').primaryKey(),
+  calorieGoal: integer('calorie_goal').default(2000).notNull(),
+  proteinGoal: integer('protein_goal').default(150).notNull(),
+  carbsGoal: integer('carbs_goal').default(250).notNull(),
+  fatGoal: integer('fat_goal').default(65).notNull(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
+
+export const dailyNutritionSummariesRelations = relations(dailyNutritionSummaries, ({ one }) => ({
+  user: one(user, {
+    fields: [dailyNutritionSummaries.userId],
+    references: [user.id],
+  }),
+}))
+
+export const nutritionGoalsRelations = relations(nutritionGoals, ({ one }) => ({
+  user: one(user, {
+    fields: [nutritionGoals.userId],
     references: [user.id],
   }),
 }))
