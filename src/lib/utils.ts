@@ -85,8 +85,7 @@ export function formatDateTime(dateString: string, timeString: string): string {
 }
 
 export function formatLocalDate(date: Date): string {
-  const istDate = toZonedTime(date, IST_TIMEZONE)
-  return format(istDate, 'yyyy-MM-dd', { timeZone: IST_TIMEZONE })
+  return format(date, 'yyyy-MM-dd', { timeZone: IST_TIMEZONE })
 }
 
 export function getCurrentISTDate(): Date {
