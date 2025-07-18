@@ -29,8 +29,7 @@ function shouldSendReminder(reminder: any, currentDate: string, currentTime: str
     case 'Daily':
       shouldSend = reminderTime <= currentTime;
       if (shouldSend && lastSent) {
-        const lastSentIST = toZonedTime(lastSent, 'Asia/Kolkata');
-        const lastSentDate = formatLocalDate(lastSentIST);
+        const lastSentDate = formatLocalDate(lastSent);
         shouldSend = lastSentDate !== currentDate;
         console.log(`Daily repeat: timeMatch=${reminderTime <= currentTime}, lastSentDate=${lastSentDate}, currentDate=${currentDate}, shouldSend=${shouldSend}`);
       } else {
