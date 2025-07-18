@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/db';
 import { reminders } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { sendWhatsappMessage, formatDateTime, formatDate, getCurrentISTDate, formatLocalDate } from '@/lib/utils';
+import { sendWhatsappMessage, formatDateTime, formatDate, formatLocalDate } from '@/lib/utils';
 import { toZonedTime } from 'date-fns-tz';
 
 function shouldSendReminder(reminder: any, currentDate: string, currentTime: string, istTime: Date): boolean {
@@ -78,9 +78,10 @@ function shouldSendReminder(reminder: any, currentDate: string, currentTime: str
 
 async function processReminders() {
   try {
-    const istTime = getCurrentISTDate();
-    
-    const currentDate = formatLocalDate(istTime);
+    const now = new Date();
+    const istTime = toZonedTime(now, 'Asia/Kolkata');
+
+    const currentDate = formatLocalDate(now);
     const currentTime = istTime.toTimeString().split(' ')[0];
     
     console.log(`Processing reminders at ${currentDate} ${currentTime} (IST)`);
