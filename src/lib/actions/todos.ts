@@ -25,6 +25,19 @@ export async function getTodos() {
   return getCachedTodos(session.user.id)
 }
 
+export async function getCompletedTodos() {
+  const session = await getCachedSession()
+  if (!session?.user?.id) {
+    return []
+  }
+  
+  const userCompletedTodos = await db.query.todos.findMany({
+    where: and(eq(todos.userId, session.user.id), eq(todos.completed, true)),
+    orderBy: (todos, { desc }) => [desc(todos.id)],
+  })
+  return userCompletedTodos
+}
+
 export async function createTodo(formData: {
   title: string
   priority: 'High' | 'Medium' | 'Low'
@@ -78,16 +91,23 @@ export async function updateTodo(
     throw new Error('Not authenticated')
   }
 
+  // If completed status is being changed, update completedDate accordingly
+  const updateData: any = {
+    title: formData.title,
+    priority: formData.priority,
+    dueDate: formData.dueDate,
+    reminderTime: formData.reminderTime || null,
+    category: formData.category,
+  }
+
+  if (formData.completed !== undefined) {
+    updateData.completed = formData.completed
+    updateData.completedDate = formData.completed ? new Date() : null
+  }
+
   const [updatedTodo] = await db
     .update(todos)
-    .set({
-      title: formData.title,
-      priority: formData.priority,
-      dueDate: formData.dueDate,
-      reminderTime: formData.reminderTime || null,
-      completed: formData.completed,
-      category: formData.category,
-    })
+    .set(updateData)
     .where(and(eq(todos.id, id), eq(todos.userId, session.user.id)))
     .returning()
 
@@ -102,9 +122,15 @@ export async function toggleTodo(id: number, completed: boolean) {
     throw new Error('Not authenticated')
   }
 
+  const newCompleted = !completed
+  const completedDate = newCompleted ? new Date() : null
+
   const [toggledTodo] = await db
     .update(todos)
-    .set({ completed: !completed })
+    .set({ 
+      completed: newCompleted,
+      completedDate: completedDate
+    })
     .where(and(eq(todos.id, id), eq(todos.userId, session.user.id)))
     .returning()
 

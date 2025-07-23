@@ -32,6 +32,7 @@ export const todos = pgTable('todos', {
   id: serial('id').primaryKey(),
   title: text('title').notNull(),
   completed: boolean('completed').default(false).notNull(),
+  completedDate: timestamp('completed_date'),
   priority: priorityEnum('priority'),
   dueDate: timestamp('due_date'),
   reminderTime: time('reminder_time'),

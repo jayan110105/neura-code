@@ -170,6 +170,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
         reminderTime: to24HourFormat(formData.reminderTime) || undefined,
         category: formData.category,
         completed: false,
+        completedDate: null,
         userId: '',
         timestamp: new Date().toISOString(),
       }
@@ -363,14 +364,24 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
             Manage your tasks and priorities
           </p>
         </div>
-        <Button
-          className="!h-10 px-3 py-2 text-sm m-2"
-          variant="outline"
-          onClick={openCreateModal}
-        >
-          <IconPlus className="mr-2 h-4 w-4" />
-          New Task
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            className="!h-10 px-2 sm:px-3 py-2 text-sm"
+            variant="outline"
+            onClick={() => window.location.href = '/todos/completed'}
+          >
+            <IconCircleCheck className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">View Completed</span>
+          </Button>
+          <Button
+            className="!h-10 px-2 sm:px-3 py-2 text-sm"
+            variant="outline"
+            onClick={openCreateModal}
+          >
+            <IconPlus className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">New Task</span>
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-8">
