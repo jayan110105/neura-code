@@ -315,7 +315,7 @@ export function DailyLogsSection({ dailyLogs }: DailyLogsSectionProps) {
             </div>
           )}
         </div>
-      )}
+      )} 
     </div>
   )
 } 
