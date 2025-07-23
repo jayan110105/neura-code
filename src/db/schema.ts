@@ -13,6 +13,7 @@ import {
   index,
 } from 'drizzle-orm/pg-core'
 import { user } from './auth-schema'
+import { CATEGORY_VALUES } from '@/lib/categories'
 
 export const priorityEnum = pgEnum('priority', ['High', 'Medium', 'Low'])
 export const repeatEnum = pgEnum('repeat', [
@@ -21,12 +22,7 @@ export const repeatEnum = pgEnum('repeat', [
   'Monthly',
   'None',
 ])
-export const categoryEnum = pgEnum('category', [
-  'Work',
-  'Health',
-  'Personal',
-  'Finance',
-])
+export const categoryEnum = pgEnum('category', CATEGORY_VALUES)
 
 export const todos = pgTable('todos', {
   id: serial('id').primaryKey(),

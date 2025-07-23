@@ -8,6 +8,7 @@ import { cache } from 'react'
 import { getCachedSession } from '../session'
 import { storeEmbedding, deleteEmbedding } from './embedding-actions'
 import { prepareTextForEmbedding } from '../embedding-service'
+import { type Category } from '@/lib/categories'
 
 export const getCachedTodos = cache(async (userId: string) => {
   const userTodos = await db.query.todos.findMany({
@@ -43,7 +44,7 @@ export async function createTodo(formData: {
   priority: 'High' | 'Medium' | 'Low'
   dueDate?: Date
   reminderTime?: string
-  category?: 'Work' | 'Health' | 'Personal' | 'Finance' | null
+  category?: Category
 }) {
   const session = await getCachedSession()
   if (!session?.user?.id) {
@@ -83,7 +84,7 @@ export async function updateTodo(
     dueDate?: Date
     reminderTime?: string
     completed?: boolean
-    category?: 'Work' | 'Health' | 'Personal' | 'Finance' | null
+    category?: Category
   },
 ) {
   const session = await getCachedSession()

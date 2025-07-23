@@ -1,3 +1,5 @@
+import { type Category } from '@/lib/categories'
+
 export interface Todo {
   id: number
   title: string
@@ -6,5 +8,5 @@ export interface Todo {
   priority: 'High' | 'Medium' | 'Low' | null
   dueDate: Date | null
   reminderTime: string | null
-  category: 'Work' | 'Health' | 'Personal' | 'Finance' | null
+  category: Category
 }

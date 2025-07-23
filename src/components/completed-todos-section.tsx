@@ -14,7 +14,6 @@ import {
   IconCalendarFilled,
   IconFlagFilled,
   IconGripVertical,
-  IconTagFilled,
   IconCircleCheck,
   IconAlarmFilled,
   IconTrash,
@@ -22,6 +21,7 @@ import {
 } from '@tabler/icons-react'
 import { Todo } from '@/types'
 import { formatTime } from '@/lib/utils'
+import { CategoryBadge } from '@/components/ui/category-badge'
 
 type Action =
   | { type: 'delete'; id: number }
@@ -58,23 +58,6 @@ export function CompletedTodosSection({ todos }: { todos: Todo[] }) {
       case 'Medium':
         return 'text-[#ffb110]'
       case 'Low':
-        return 'text-[#2383e2]'
-      default:
-        return 'text-muted-foreground'
-    }
-  }
-
-  const getCategoryColorClass = (
-    category: 'Work' | 'Health' | 'Personal' | 'Finance' | null,
-  ) => {
-    switch (category) {
-      case 'Work':
-        return 'text-[#ffb110]'
-      case 'Health':
-        return 'text-[#de5550]'
-      case 'Personal':
-        return 'text-[#22c55e]'
-      case 'Finance':
         return 'text-[#2383e2]'
       default:
         return 'text-muted-foreground'
@@ -193,16 +176,7 @@ export function CompletedTodosSection({ todos }: { todos: Todo[] }) {
                 />
                 {todo.priority}
               </div>
-              {todo.category && (
-                <div className="border-border text-muted-foreground flex items-center gap-1 text-xs">
-                  <IconTagFilled
-                    className={`mr-1 h-3 w-3 ${getCategoryColorClass(
-                      todo.category,
-                    )}`}
-                  />
-                  {todo.category}
-                </div>
-              )}
+              <CategoryBadge category={todo.category} size="sm" />
               {todo.dueDate && (
                 <div className="text-muted-foreground flex items-center gap-1 text-xs">
                   <IconCalendarFilled className="h-3 w-3" />

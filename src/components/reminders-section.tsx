@@ -32,11 +32,13 @@ import {
   IconAlarmFilled,
   IconRepeat,
   IconTrash,
-  IconTagFilled,
 } from '@tabler/icons-react'
 import TextareaAutosize from 'react-textarea-autosize'
+import { CategorySelect } from '@/components/ui/category-select'
+import { CategoryBadge } from '@/components/ui/category-badge'
 import { Reminder } from '@/types'
 import { formatTime, to24HourFormat } from '@/lib/utils'
+import { type Category } from '@/lib/categories'
 
 type ReminderForm = {
   title: string
@@ -44,7 +46,7 @@ type ReminderForm = {
   time: string
   date?: Date
   repeat: 'Daily' | 'Weekly' | 'Monthly' | 'None' | null
-  category: 'Work' | 'Health' | 'Personal' | 'Finance' | null
+  category: Category
 }
 
 type Action =
@@ -104,7 +106,7 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
     description: '',
     time: '9:00 AM',
     repeat: 'Daily',
-    category: 'Work',
+    category: 'Home',
   })
 
   useEffect(() => {
@@ -126,7 +128,7 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
       description: '',
       time: '9:00 AM',
       repeat: 'Daily',
-      category: 'Work',
+      category: 'Home',
     })
     setIsModalOpen(true)
   }
@@ -220,22 +222,7 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
     }
   }
 
-  const getCategoryColorClass = (
-    category: 'Work' | 'Health' | 'Personal' | 'Finance' | null,
-  ) => {
-    switch (category) {
-      case 'Work':
-        return 'text-[#ffb110]'
-      case 'Health':
-        return 'text-[#de5550]'
-      case 'Personal':
-        return 'text-[#22c55e]'
-      case 'Finance':
-        return 'text-[#2383e2]'
-      default:
-        return 'text-muted-foreground'
-    }
-  }
+
 
   const isEditMode = Boolean(editingReminder)
 
@@ -326,14 +313,7 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
                       />
                       {reminder.repeat}
                     </div>
-                    {reminder.category && (
-                      <div className="text-muted-foreground flex items-center gap-1 text-xs">
-                        <IconTagFilled
-                          className={`h-3 w-3 ${getCategoryColorClass(reminder.category)}`}
-                        />
-                        {reminder.category}
-                      </div>
-                    )}
+                    <CategoryBadge category={reminder.category} size="sm" />
                   </div>
                 </CardContent>
               </Card>
@@ -460,53 +440,14 @@ export function RemindersSection({ reminders }: { reminders: Reminder[] }) {
                   </SelectItem>
                 </SelectContent>
               </Select>
-              <Select
-                value={formData.category || undefined}
-                onValueChange={(value) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    category: value as
-                      | 'Work'
-                      | 'Health'
-                      | 'Personal'
-                      | 'Finance'
-                      | null,
-                  }))
+              <CategorySelect
+                value={formData.category}
+                onValueChange={(category) =>
+                  setFormData((prev) => ({ ...prev, category }))
                 }
-              >
-                <SelectTrigger
-                  size="sm"
-                  className="border-text-muted-foreground text-muted-foreground rounded-sm px-2 py-0 text-xs focus:ring-0 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none"
-                >
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Work" className="text-xs">
-                    <IconTagFilled
-                      className={`h-3 w-3 ${getCategoryColorClass('Work')}`}
-                    />
-                    Work
-                  </SelectItem>
-                  <SelectItem value="Health" className="text-xs">
-                    <IconTagFilled
-                      className={`h-3 w-3 ${getCategoryColorClass('Health')}`}
-                    />
-                    Health
-                  </SelectItem>
-                  <SelectItem value="Personal" className="text-xs">
-                    <IconTagFilled
-                      className={`h-3 w-3 ${getCategoryColorClass('Personal')}`}
-                    />
-                    Personal
-                  </SelectItem>
-                  <SelectItem value="Finance" className="text-xs">
-                    <IconTagFilled
-                      className={`h-3 w-3 ${getCategoryColorClass('Finance')}`}
-                    />
-                    Finance
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+                size="sm"
+                includeNone={false}
+              />
             </div>
           </div>
 

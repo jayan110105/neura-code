@@ -4,11 +4,11 @@ import { Card, CardContent } from '@/components/ui/card'
 import {
   IconAlarmFilled,
   IconRepeat,
-  IconTagFilled,
   IconCalendarFilled,
 } from '@tabler/icons-react'
 import { Reminder } from '@/types'
 import { formatTime } from '@/lib/utils'
+import { CategoryBadge } from '@/components/ui/category-badge'
 
 interface RemindersListProps {
   reminders: Reminder[]
@@ -32,19 +32,6 @@ export function RemindersList({
         return 'text-[#a855f7]'
       case 'None':
         return 'text-muted-foreground'
-    }
-  }
-
-  const getCategoryColorClass = (category: string) => {
-    switch (category) {
-      case 'Work':
-        return 'text-[#ffb110]'
-      case 'Health':
-        return 'text-[#de5550]'
-      case 'Personal':
-        return 'text-[#22c55e]'
-      case 'Finance':
-        return 'text-[#2383e2]'
     }
   }
 
@@ -107,14 +94,7 @@ export function RemindersList({
                           {reminder.repeat}
                         </div>
                       )}
-                      {reminder.category && (
-                        <div className="text-muted-foreground flex items-center gap-1 text-xs">
-                          <IconTagFilled
-                            className={`h-3 w-3 ${getCategoryColorClass(reminder.category)}`}
-                          />
-                          {reminder.category}
-                        </div>
-                      )}
+                      <CategoryBadge category={reminder.category} size="sm" />
                     </div>
                   </div>
                 </div>

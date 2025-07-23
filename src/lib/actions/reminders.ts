@@ -10,6 +10,7 @@ import { getCachedSession } from '../session'
 import { formatLocalDate } from '../utils'
 import { storeEmbedding, deleteEmbedding } from './embedding-actions'
 import { prepareTextForEmbedding } from '../embedding-service'
+import { type Category } from '@/lib/categories'
 
 export const getCachedReminders = cache(async (userId: string): Promise<Reminder[]> => {
   const userReminders = await db.query.reminders.findMany({
@@ -37,7 +38,7 @@ export async function createReminder(formData: {
   time: string | null
   date: Date | null
   repeat: 'Daily' | 'Weekly' | 'Monthly' | 'None' | null
-  category: 'Work' | 'Health' | 'Personal' | 'Finance' | null
+  category: Category
 }) {
   const session = await getCachedSession()
   if (!session?.user?.id) {
@@ -77,7 +78,7 @@ export async function updateReminder(
     time: string | null
     date: Date | null
     repeat: 'Daily' | 'Weekly' | 'Monthly' | 'None' | null
-    category: 'Work' | 'Health' | 'Personal' | 'Finance' | null
+    category: Category
   },
 ) {
   const session = await getCachedSession()

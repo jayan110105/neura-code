@@ -23,7 +23,6 @@ import {
   IconCalendarFilled,
   IconFlagFilled,
   IconGripVertical,
-  IconTagFilled,
   IconCircleCheck,
   IconAlarmFilled,
   IconTrash,
@@ -36,8 +35,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { CategorySelect } from '@/components/ui/category-select'
+import { CategoryBadge } from '@/components/ui/category-badge'
 import { Todo } from '@/types'
 import { formatTime, to24HourFormat } from '@/lib/utils'
+import { type Category } from '@/lib/categories'
 
 type Action =
   | { type: 'add'; todo: Todo }
@@ -92,7 +94,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
     title: string
     dueDate?: Date
     priority: 'High' | 'Medium' | 'Low'
-    category: 'Work' | 'Health' | 'Personal' | 'Finance' | null
+    category: Category
     reminderTime: string
   }>({
     title: '',
@@ -209,23 +211,6 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
     }
   }
 
-  const getCategoryColorClass = (
-    category: 'Work' | 'Health' | 'Personal' | 'Finance' | null,
-  ) => {
-    switch (category) {
-      case 'Work':
-        return 'text-[#ffb110]'
-      case 'Health':
-        return 'text-[#de5550]'
-      case 'Personal':
-        return 'text-[#22c55e]'
-      case 'Finance':
-        return 'text-[#2383e2]'
-      default:
-        return 'text-muted-foreground'
-    }
-  }
-
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const todayTime = today.getTime()
@@ -308,16 +293,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
                 />
                 {todo.priority}
               </div>
-              {todo.category && (
-                <div className="border-border text-muted-foreground flex items-center gap-1 text-xs">
-                  <IconTagFilled
-                    className={`mr-1 h-3 w-3 ${getCategoryColorClass(
-                      todo.category,
-                    )}`}
-                  />
-                  {todo.category}
-                </div>
-              )}
+              <CategoryBadge category={todo.category} size="sm" />
               {todo.dueDate && (
                 <div className="text-muted-foreground flex items-center gap-1 text-xs">
                   <IconCalendarFilled className="h-3 w-3" />
@@ -478,56 +454,13 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
                 </SelectContent>
               </Select>
 
-              <Select
-                value={formData.category || 'none'}
-                onValueChange={(value) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    category: value === 'none' ? null : value as 'Work' | 'Health' | 'Personal' | 'Finance' | null,
-                  }))
+              <CategorySelect
+                value={formData.category}
+                onValueChange={(category) =>
+                  setFormData((prev) => ({ ...prev, category }))
                 }
-              >
-                <SelectTrigger
-                  size="sm"
-                  className="border-text-muted-foreground text-muted-foreground rounded-sm px-2 py-0 text-xs focus:ring-0 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none"
-                >
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none" className="text-xs">
-                    <IconTagFilled
-                      className={'h-3 w-3 text-muted-foreground'}
-                    />
-                    <span className="text-muted-foreground">None</span>
-                  </SelectItem>
-                  <SelectItem value="Work" className="text-xs">
-                    <IconTagFilled
-                      className={`h-3 w-3 ${getCategoryColorClass('Work')}`}
-                    />
-                    Work
-                  </SelectItem>
-                  <SelectItem value="Health" className="text-xs">
-                    <IconTagFilled
-                      className={`h-3 w-3 ${getCategoryColorClass('Health')}`}
-                    />
-                    Health
-                  </SelectItem>
-                  <SelectItem value="Personal" className="text-xs">
-                    <IconTagFilled
-                      className={`h-3 w-3 ${getCategoryColorClass(
-                        'Personal',
-                      )}`}
-                    />
-                    Personal
-                  </SelectItem>
-                  <SelectItem value="Finance" className="text-xs">
-                    <IconTagFilled
-                      className={`h-3 w-3 ${getCategoryColorClass('Finance')}`}
-                    />
-                    Finance
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+                size="sm"
+              />
 
               <div>
                 <Select

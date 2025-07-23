@@ -1,3 +1,5 @@
+import { type Category } from '@/lib/categories'
+
 export interface Reminder {
   id: number
   title: string
@@ -6,5 +8,5 @@ export interface Reminder {
   date: Date | null
   repeat: 'Daily' | 'Weekly' | 'Monthly' | 'None' | null
   enabled: boolean
-  category: 'Work' | 'Health' | 'Personal' | 'Finance' | null
+  category: Category
 }
