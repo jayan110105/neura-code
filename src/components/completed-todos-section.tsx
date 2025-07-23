@@ -158,7 +158,7 @@ export function CompletedTodosSection({ todos }: { todos: Todo[] }) {
             </h3>
             <div className="mt-2 flex flex-wrap items-center gap-2">
               {todo.completedDate && (
-                <div className="text-muted-foreground flex items-center gap-1 text-xs bg-muted/50 px-2 py-1 rounded-sm">
+                <div className="text-muted-foreground flex items-center gap-1 text-xs">
                   <IconCircleCheckFilled className="h-3 w-3 text-[#22c55e]" />
                   {new Date(todo.completedDate).toLocaleDateString('en-GB', {
                     day: 'numeric',
