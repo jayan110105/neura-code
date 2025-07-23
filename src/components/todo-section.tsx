@@ -26,6 +26,9 @@ import {
   IconCircleCheck,
   IconAlarmFilled,
   IconTrash,
+  IconFilter,
+  IconTagFilled,
+  IconX,
 } from '@tabler/icons-react'
 import { DatePicker } from '@/components/ui/date-picker'
 import {
@@ -39,7 +42,7 @@ import { CategorySelect } from '@/components/ui/category-select'
 import { CategoryBadge } from '@/components/ui/category-badge'
 import { Todo } from '@/types'
 import { formatTime, to24HourFormat } from '@/lib/utils'
-import { type Category } from '@/lib/categories'
+import { type Category, getAllCategories } from '@/lib/categories'
 
 type Action =
   | { type: 'add'; todo: Todo }
@@ -85,6 +88,14 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
     optimisticReducer,
   )
   const [, startTransition] = useTransition()
+
+  const [filters, setFilters] = useState<{
+    category: Category | 'all'
+    priority: 'High' | 'Medium' | 'Low' | 'all'
+  }>({
+    category: 'all',
+    priority: 'all'
+  })
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
@@ -215,11 +226,27 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
   today.setHours(0, 0, 0, 0)
   const todayTime = today.getTime()
 
+  const applyFilters = (todo: Todo): boolean => {
+    if (filters.category !== 'all' && todo.category !== filters.category) {
+      return false
+    }
+    
+    if (filters.priority !== 'all' && todo.priority !== filters.priority) {
+      return false
+    }
+    
+    return true
+  }
+
   const { todayTodos, upcomingTodos } = useMemo(() => {
     const todayResults: Todo[] = []
     const upcomingResults: Todo[] = []
     
     for (const todo of optimisticTodos) {
+      if (!applyFilters(todo)) {
+        continue
+      }
+      
       const dueDate = todo.dueDate ? new Date(todo.dueDate) : null
       const dueTime = dueDate ? dueDate.getTime() : null
       
@@ -245,7 +272,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
       todayTodos: todayResults,
       upcomingTodos: upcomingResults
     }
-  }, [optimisticTodos, todayTime])
+  }, [optimisticTodos, todayTime, filters])
   
   const isOverdue = (todo: Todo) => (todo as any)._isOverdue
 
@@ -358,6 +385,82 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
             <span className="hidden sm:inline">New Task</span>
           </Button>
         </div>
+      </div>
+
+      {/* Filters Section */}
+      <div className="mb-6 flex flex-wrap items-center gap-3 rounded-lg">
+        
+        {/* Category Filter */}
+        <Select
+          value={filters.category || 'all'}
+          onValueChange={(value) =>
+            setFilters(prev => ({ 
+              ...prev, 
+              category: value === 'all' ? 'all' : value as Category 
+            }))
+          }
+        >
+          <SelectTrigger className="h-8 text-xs focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none focus-visible:outline-none focus:border-border focus-visible:border-border">
+            <SelectValue placeholder="All Categories" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all" className="text-xs">All Categories</SelectItem>
+            {getAllCategories().map((category) => (
+              <SelectItem key={category.value} value={category.value} className="text-xs">
+                <div className="flex items-center gap-2">
+                  <CategoryBadge category={category.value} size="sm" variant="outline" />
+                  {/* {category.label} */}
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Priority Filter */}
+        <Select
+          value={filters.priority}
+          onValueChange={(value) =>
+            setFilters(prev => ({ ...prev, priority: value as 'High' | 'Medium' | 'Low' | 'all' }))
+          }
+        >
+          <SelectTrigger className="h-8 text-xs focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none focus-visible:outline-none focus:border-border focus-visible:border-border">
+            <SelectValue placeholder="All Priorities" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all" className="text-xs">All Priorities</SelectItem>
+            <SelectItem value="High" className="text-xs">
+              <div className="flex items-center gap-2">
+                <IconFlagFilled className="h-3 w-3 text-[#de5550]" />
+                High
+              </div>
+            </SelectItem>
+            <SelectItem value="Medium" className="text-xs">
+              <div className="flex items-center gap-2">
+                <IconFlagFilled className="h-3 w-3 text-[#ffb110]" />
+                Medium
+              </div>
+            </SelectItem>
+            <SelectItem value="Low" className="text-xs">
+              <div className="flex items-center gap-2">
+                <IconFlagFilled className="h-3 w-3 text-[#2383e2]" />
+                Low
+              </div>
+            </SelectItem>
+          </SelectContent>
+        </Select>
+
+        {/* Clear Filters Button */}
+        {(filters.category !== 'all' || filters.priority !== 'all') && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
+            onClick={() => setFilters({ category: 'all', priority: 'all' })}
+          >
+            <IconX className="h-3 w-3 sm:mr-1" />
+            <span className="hidden sm:inline">Clear Filters</span>
+          </Button>
+        )}
       </div>
 
       <div className="space-y-8">
