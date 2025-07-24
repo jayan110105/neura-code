@@ -7,6 +7,7 @@ import { TodosList } from '@/components/today/todos-list'
 import { RemindersList } from '@/components/today/reminders-list'
 import { DailyLogsSummary } from '@/components/today/daily-logs-summary'
 import { Todo, Reminder, Note, Bookmark, DailyLog, DailySummary } from '@/types'
+import { useFeatureFlags } from '@/lib/feature-flags'
 
 interface TodaySectionProps {
   todos: Todo[]
@@ -26,6 +27,7 @@ export function TodaySection({
   dailySummary,
 }: TodaySectionProps) {
   const router = useRouter()
+  const featureFlags = useFeatureFlags()
 
   const handleNoteClick = (noteId: number) => {
     router.push(`/notes?id=${noteId}`)
@@ -51,7 +53,9 @@ export function TodaySection({
           Your captured content organized by type
         </p>
 
-        <DailyLogsSummary dailyLogs={dailyLogs} dailySummary={dailySummary} />
+        {featureFlags.showLogs && (
+          <DailyLogsSummary dailyLogs={dailyLogs} dailySummary={dailySummary} />
+        )}
       </div>
 
       <NotesGrid notes={notes} onNoteClick={handleNoteClick} />

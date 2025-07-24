@@ -30,6 +30,7 @@ import {
 import { authClient } from '@/lib/auth-client'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
+import { useFeatureFlags } from '@/lib/feature-flags'
 
 const menuItems = [
   {
@@ -38,6 +39,7 @@ const menuItems = [
     icon: IconSearch,
     iconFilled: IconSearch,
     href: '/search',
+    flagKey: 'showSearch' as const,
   },
   {
     id: 'today',
@@ -59,6 +61,7 @@ const menuItems = [
     icon: IconNotebook,
     iconFilled: IconNotebook,
     href: '/daily-logs',
+    flagKey: 'showLogs' as const,
   },
   {
     id: 'bookmarks',
@@ -87,6 +90,7 @@ const menuItems = [
     icon: IconFileText,
     iconFilled: IconFileTextFilled,
     href: '/testing',
+    flagKey: 'showTesting' as const,
   },
 ]
 
@@ -94,6 +98,7 @@ export function AppSidebar() {
   const router = useRouter()
   const pathname = usePathname()
   const { isMobile, setOpenMobile } = useSidebar()
+  const featureFlags = useFeatureFlags()
 
   const handleSignOut = async () => {
     await authClient.signOut({
@@ -104,6 +109,13 @@ export function AppSidebar() {
       },
     })
   }
+
+  const visibleMenuItems = menuItems.filter((item) => {
+    if (item.flagKey) {
+      return featureFlags[item.flagKey]
+    }
+    return true
+  })
 
   return (
     <Sidebar className="bg-sidebar border-r border-none">
@@ -121,7 +133,7 @@ export function AppSidebar() {
 
       <SidebarContent className="px-3 py-1">
         <SidebarMenu>
-          {menuItems.map((item) => {
+          {visibleMenuItems.map((item) => {
             const isActive = pathname === item.href
             const IconComponent = isActive ? item.iconFilled : item.icon
 
