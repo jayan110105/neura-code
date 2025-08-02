@@ -26,8 +26,6 @@ import {
   IconCircleCheck,
   IconAlarmFilled,
   IconTrash,
-  IconFilter,
-  IconTagFilled,
   IconX,
 } from '@tabler/icons-react'
 import { DatePicker } from '@/components/ui/date-picker'
@@ -43,6 +41,12 @@ import { CategoryBadge } from '@/components/ui/category-badge'
 import { Todo } from '@/types'
 import { formatTime, to24HourFormat } from '@/lib/utils'
 import { type Category, getAllCategories } from '@/lib/categories'
+
+type ExtendedTodo = Todo & {
+  _isOverdue?: boolean
+  _isDueToday?: boolean
+  _sortKey?: number
+}
 
 type Action =
   | { type: 'add'; todo: Todo }
@@ -226,20 +230,19 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
   today.setHours(0, 0, 0, 0)
   const todayTime = today.getTime()
 
-  const applyFilters = (todo: Todo): boolean => {
-    if (filters.category !== 'all' && todo.category !== filters.category) {
-      return false
-    }
-    
-    if (filters.priority !== 'all' && todo.priority !== filters.priority) {
-      return false
-    }
-    
-    return true
-  }
-
   const { todayTodos, upcomingTodos } = useMemo(() => {
-    const todayResults: Todo[] = []
+    const applyFilters = (todo: Todo): boolean => {
+      if (filters.category !== 'all' && todo.category !== filters.category) {
+        return false
+      }
+      
+      if (filters.priority !== 'all' && todo.priority !== filters.priority) {
+        return false
+      }
+      
+      return true
+    }
+    const todayResults: ExtendedTodo[] = []
     const upcomingResults: Todo[] = []
     
     for (const todo of optimisticTodos) {
@@ -260,13 +263,20 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
           _isOverdue: dueTime ? dueTime < todayTime : false,
           _isDueToday: dueTime === todayTime,
           _sortKey: dueTime ? (dueTime < todayTime ? 0 : 1) : 2
-        } as Todo & { _isOverdue: boolean; _isDueToday: boolean; _sortKey: number })
+        } as ExtendedTodo)
       } else if (dueTime > todayTime) {
         upcomingResults.push(todo)
       }
     }
     
-    todayResults.sort((a, b) => (a as any)._sortKey - (b as any)._sortKey)
+    todayResults.sort((a, b) => (a._sortKey || 0) - (b._sortKey || 0))
+    
+    // Sort upcoming todos by date (earliest first, then todos without dates)
+    upcomingResults.sort((a, b) => {
+      const aDate = a.dueDate ? new Date(a.dueDate).getTime() : Number.MAX_SAFE_INTEGER
+      const bDate = b.dueDate ? new Date(b.dueDate).getTime() : Number.MAX_SAFE_INTEGER
+      return aDate - bDate
+    })
     
     return {
       todayTodos: todayResults,
@@ -274,7 +284,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
     }
   }, [optimisticTodos, todayTime, filters])
   
-  const isOverdue = (todo: Todo) => (todo as any)._isOverdue
+  const isOverdue = (todo: Todo) => (todo as ExtendedTodo)._isOverdue
 
   const TodoItem = ({ todo }: { todo: Todo }) => (
     <Card

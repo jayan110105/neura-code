@@ -3,7 +3,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { IconNote, IconSparkles, IconLoader2 } from '@tabler/icons-react'
 import type { DailyLog, DailySummary } from '@/types'
-import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { generateTodaysSummaryAction } from '@/lib/actions/daily-summaries'
 import { useFormStatus } from 'react-dom'
@@ -35,7 +34,7 @@ export function DailyLogsSummary({ dailyLogs, dailySummary }: DailyLogsSummaryPr
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <IconNote className="h-5 w-5" />
-            <CardTitle>Today's Logs</CardTitle>
+            <CardTitle>Today&apos;s Logs</CardTitle>
           </div>
           <div className="flex items-center gap-2">
             {dailyLogs.length > 0 && (
@@ -51,7 +50,7 @@ export function DailyLogsSummary({ dailyLogs, dailySummary }: DailyLogsSummaryPr
           <p className="text-muted-foreground leading-relaxed">{dailySummary.summary}</p>
         ) : dailyLogs.length > 0 ? (
           <p className="text-muted-foreground text-sm">
-            No summary generated yet for today's logs.
+            No summary generated yet for today&apos;s logs.
           </p>
         ) : (
           <p className="text-muted-foreground text-sm">No logs for today yet</p>

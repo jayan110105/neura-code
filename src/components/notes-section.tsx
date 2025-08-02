@@ -12,7 +12,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from '@/components/ui/dialog'
 import { IconPlus, IconTrash } from '@tabler/icons-react'
 import { Note } from '@/types'

@@ -241,7 +241,7 @@ export function DailyLogsSection({ dailyLogs }: DailyLogsSectionProps) {
             No daily logs yet
           </h3>
           <p className="text-muted-foreground mt-2 mb-4 text-sm">
-            You haven't created any daily logs yet.
+            You haven&apos;t created any daily logs yet.
           </p>
           <Button variant="outline" onClick={() => handleOpenDialog(null)}>
             <IconPlus className="mr-2 h-4 w-4" />
