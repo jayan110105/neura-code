@@ -18,7 +18,7 @@ export const getWhatsappTools = (userId: string) => {
   return {
     createTodo: tool({
       description: 'Create a new todo item. A due date can be provided.',
-      parameters: z.object({
+      inputSchema: z.object({
         title: z.string().describe('The title of the todo.'),
         dueDate: z
           .string()
@@ -54,7 +54,7 @@ export const getWhatsappTools = (userId: string) => {
     createBookmark: tool({
       description:
         'Saves a new bookmark with a URL and a title. The title should be descriptive and summarize the content of the URL. This tool should be used for saving links and not for conversational responses.',
-      parameters: z.object({
+      inputSchema: z.object({
         url: z.string().describe('The URL of the bookmark to save.'),
         title: z
           .string()
@@ -69,7 +69,7 @@ export const getWhatsappTools = (userId: string) => {
     }),
     createNote: tool({
       description: 'Create a new note.',
-      parameters: z.object({
+      inputSchema: z.object({
         title: z.string().describe('The title of the note.'),
         content: z.string().describe('The content of the note.'),
       }),
@@ -80,7 +80,7 @@ export const getWhatsappTools = (userId: string) => {
     }),
     createReminder: tool({
       description: 'Create a new reminder with a specific date and time.',
-      parameters: z.object({
+      inputSchema: z.object({
         title: z.string().describe('The title of the reminder.'),
         date: z
           .string()
@@ -100,7 +100,7 @@ export const getWhatsappTools = (userId: string) => {
     }),
     dailyLog: tool({
       description: 'Create a new daily log entry for today.',
-      parameters: z.object({
+      inputSchema: z.object({
         description: z.string().describe('The content of the daily log.'),
       }),
       execute: async ({ description }) => {
@@ -118,7 +118,7 @@ export const getWhatsappTools = (userId: string) => {
     }),
     ragSearch: tool({
       description: 'Search through the user\'s knowledge base (notes, bookmarks, todos, daily logs) to find relevant information and provide context-aware answers. Use this when the user asks questions about their existing content or wants to find/recall something they\'ve stored.',
-      parameters: z.object({
+      inputSchema: z.object({
         query: z.string().describe('The search query or question to find relevant content in the user\'s knowledge base'),
         maxResults: z.number().optional().describe('Maximum number of results to return (default: 5)'),
       }),
@@ -134,7 +134,6 @@ export const getWhatsappTools = (userId: string) => {
             model: google('models/gemini-2.5-flash'),
             system: `You are Neura, helping the user by searching their personal knowledge base. Use the provided context to give a helpful, accurate response. Be conversational and reference the specific content you found. If the context contains multiple relevant items, summarize them clearly.`,
             prompt: `User query: "${query}"\n\nRelevant content from their knowledge base:\n${contextualContent}\n\nPlease provide a helpful response based on this information.`,
-            maxTokens: 800,
           })
           
           return text

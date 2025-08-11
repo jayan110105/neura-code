@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { generateText } from 'ai';
+import { generateText, stepCountIs } from 'ai';
 import { getUserByPhoneNumber } from '@/lib/auth';
 import { getWhatsappTools } from '@/lib/whatsapp-tools';
 import { storeMessage, getConversationHistory } from '@/lib/actions/messages';
@@ -143,27 +143,12 @@ IMPORTANT - WhatsApp Formatting Rules:
       model: google('models/gemini-2.5-flash'),
       messages,
       tools: toolDefinitions,
-      maxSteps: 10,
+      stopWhen: stepCountIs(10),
     });
 
     console.log('Tool calls:', JSON.stringify(toolCalls, null, 2));
 
-    let replyMessage: string;
-
-    if (toolCalls?.length > 0) {
-      const toolCall = toolCalls[0];
-      const tool = toolDefinitions[
-        toolCall.toolName as keyof typeof toolDefinitions
-      ];
-
-      if (tool) {
-        replyMessage = await (tool as any).execute(toolCall.args);
-      } else {
-        replyMessage = 'I am not sure how to help with that.';
-      }
-    } else {
-      replyMessage = text ?? 'I am not sure how to help with that.';
-    }
+    const replyMessage = text ?? 'I am not sure how to help with that.';
 
     console.log('Reply to user:', replyMessage);
 
