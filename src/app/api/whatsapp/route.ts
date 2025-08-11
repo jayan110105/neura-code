@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { createOpenAI } from '@ai-sdk/openai';
 import { generateText, stepCountIs } from 'ai';
 import { getUserByPhoneNumber } from '@/lib/auth';
 import { getWhatsappTools } from '@/lib/whatsapp-tools';
@@ -9,6 +10,13 @@ import { sendWhatsappMessage, getCurrentISTDate, formatLocalDate } from '@/lib/u
 const google = createGoogleGenerativeAI({
   apiKey: process.env.GOOGLE_API_KEY,
 });
+
+const openai = createOpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+const aiProvider = (process.env.AI_PROVIDER ?? 'google').toLowerCase();
+const aiModelName = process.env.AI_MODEL ?? (aiProvider === 'openai' ? 'gpt-5-nano' : 'models/gemini-2.5-flash');
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
@@ -140,7 +148,7 @@ IMPORTANT - WhatsApp Formatting Rules:
     const toolDefinitions = getWhatsappTools(user.id);
 
     const { toolCalls, text } = await generateText({
-      model: google('models/gemini-2.5-flash'),
+      model: aiProvider === 'openai' ? openai(aiModelName) : google(aiModelName),
       messages,
       tools: toolDefinitions,
       stopWhen: stepCountIs(10),
