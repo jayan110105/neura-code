@@ -26,11 +26,25 @@ export const getWhatsappTools = (userId: string) => {
           .describe(
             'The due date for the todo in YYYY-MM-DD format (e.g., "2024-07-26").',
           ),
-        priority: z.enum(['High', 'Medium', 'Low']).optional().describe('The priority of the todo.'),
+        priority: z
+          .enum([
+            'Important & Urgent',
+            'Important & Not Urgent',
+            'Not Important & Urgent',
+            'Not Important & Not Urgent',
+          ])
+          .optional()
+          .describe('The priority of the todo.'),
       }),
       execute: async ({ title, dueDate, priority }) => {
-        await createTodoFromAgent(userId, title, priority || 'Medium', dueDate)
-        const priorityText = priority && priority !== 'Medium' ? ` (${priority} priority)` : ''
+        await createTodoFromAgent(
+          userId,
+          title,
+          priority || 'Important & Not Urgent',
+          dueDate,
+        )
+        const defaultPriority = 'Important & Not Urgent'
+        const priorityText = priority && priority !== defaultPriority ? ` (${priority})` : ''
         if (dueDate) {
           return `Todo "${title}" created with due date ${dueDate}${priorityText}.`
         }

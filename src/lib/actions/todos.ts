@@ -41,7 +41,11 @@ export async function getCompletedTodos() {
 
 export async function createTodo(formData: {
   title: string
-  priority: 'High' | 'Medium' | 'Low'
+  priority:
+    | 'Important & Urgent'
+    | 'Important & Not Urgent'
+    | 'Not Important & Urgent'
+    | 'Not Important & Not Urgent'
   dueDate?: Date
   reminderTime?: string
   category?: Category
@@ -80,7 +84,11 @@ export async function updateTodo(
   id: number,
   formData: {
     title: string
-    priority: 'High' | 'Medium' | 'Low'
+    priority:
+      | 'Important & Urgent'
+      | 'Important & Not Urgent'
+      | 'Not Important & Urgent'
+      | 'Not Important & Not Urgent'
     dueDate?: Date
     reminderTime?: string
     completed?: boolean
@@ -165,7 +173,11 @@ export async function deleteTodo(id: number) {
 export async function createTodoFromAgent(
   userId: string,
   title: string,
-  priority: 'High' | 'Medium' | 'Low',
+  priority:
+    | 'Important & Urgent'
+    | 'Important & Not Urgent'
+    | 'Not Important & Urgent'
+    | 'Not Important & Not Urgent',
   dueDate?: string,
 ) {
   const [newTodo] = await db

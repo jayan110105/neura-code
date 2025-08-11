@@ -95,7 +95,12 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
 
   const [filters, setFilters] = useState<{
     category: Category | 'all'
-    priority: 'High' | 'Medium' | 'Low' | 'all'
+    priority:
+      | 'Important & Urgent'
+      | 'Important & Not Urgent'
+      | 'Not Important & Urgent'
+      | 'Not Important & Not Urgent'
+      | 'all'
   }>({
     category: 'all',
     priority: 'all'
@@ -108,12 +113,16 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
   const [formData, setFormData] = useState<{
     title: string
     dueDate?: Date
-    priority: 'High' | 'Medium' | 'Low'
+    priority:
+      | 'Important & Urgent'
+      | 'Important & Not Urgent'
+      | 'Not Important & Urgent'
+      | 'Not Important & Not Urgent'
     category: Category
     reminderTime: string
   }>({
     title: '',
-    priority: 'Medium',
+    priority: 'Important & Not Urgent',
     category: null,
     reminderTime: '',
   })
@@ -133,7 +142,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
     setEditingTask(null)
     setFormData({
       title: '',
-      priority: 'Medium',
+      priority: 'Important & Not Urgent',
       category: null,
       reminderTime: '',
     })
@@ -146,7 +155,12 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
     setFormData({
       title: task.title,
       dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
-      priority: task.priority || 'Medium',
+      priority:
+        (task.priority as
+          | 'Important & Urgent'
+          | 'Important & Not Urgent'
+          | 'Not Important & Urgent'
+          | 'Not Important & Not Urgent') || 'Important & Not Urgent',
       category: task.category || null,
       reminderTime: formatTime(task.reminderTime) || '',
     })
@@ -207,7 +221,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
     setEditingTask(null)
     setFormData({
       title: '',
-      priority: 'Medium',
+      priority: 'Important & Not Urgent',
       category: null,
       reminderTime: '',
     })
@@ -215,12 +229,14 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
 
   const getPriorityIconColor = (priority: string | null) => {
     switch (priority) {
-      case 'High':
+      case 'Important & Urgent':
         return 'text-[#de5550]'
-      case 'Medium':
+      case 'Important & Not Urgent':
         return 'text-[#ffb110]'
-      case 'Low':
+      case 'Not Important & Urgent':
         return 'text-[#2383e2]'
+      case 'Not Important & Not Urgent':
+        return 'text-muted-foreground'
       default:
         return 'text-muted-foreground'
     }
@@ -430,7 +446,15 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
         <Select
           value={filters.priority}
           onValueChange={(value) =>
-            setFilters(prev => ({ ...prev, priority: value as 'High' | 'Medium' | 'Low' | 'all' }))
+            setFilters(prev => ({
+              ...prev,
+              priority: value as
+                | 'Important & Urgent'
+                | 'Important & Not Urgent'
+                | 'Not Important & Urgent'
+                | 'Not Important & Not Urgent'
+                | 'all',
+            }))
           }
         >
           <SelectTrigger className="h-8 text-xs focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none focus-visible:outline-none focus:border-border focus-visible:border-border">
@@ -438,22 +462,28 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all" className="text-xs">All Priorities</SelectItem>
-            <SelectItem value="High" className="text-xs">
+            <SelectItem value="Important & Urgent" className="text-xs">
               <div className="flex items-center gap-2">
                 <IconFlagFilled className="h-3 w-3 text-[#de5550]" />
-                High
+                Important & Urgent
               </div>
             </SelectItem>
-            <SelectItem value="Medium" className="text-xs">
+            <SelectItem value="Important & Not Urgent" className="text-xs">
               <div className="flex items-center gap-2">
                 <IconFlagFilled className="h-3 w-3 text-[#ffb110]" />
-                Medium
+                Important & Not Urgent
               </div>
             </SelectItem>
-            <SelectItem value="Low" className="text-xs">
+            <SelectItem value="Not Important & Urgent" className="text-xs">
               <div className="flex items-center gap-2">
                 <IconFlagFilled className="h-3 w-3 text-[#2383e2]" />
-                Low
+                Not Important & Urgent
+              </div>
+            </SelectItem>
+            <SelectItem value="Not Important & Not Urgent" className="text-xs">
+              <div className="flex items-center gap-2">
+                <IconFlagFilled className="h-3 w-3 text-muted-foreground" />
+                Not Important & Not Urgent
               </div>
             </SelectItem>
           </SelectContent>
@@ -541,7 +571,11 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
                 onValueChange={(value) =>
                   setFormData({
                     ...formData,
-                    priority: value as 'High' | 'Medium' | 'Low',
+                    priority: value as
+                      | 'Important & Urgent'
+                      | 'Important & Not Urgent'
+                      | 'Not Important & Urgent'
+                      | 'Not Important & Not Urgent',
                   })
                 }
               >
@@ -552,17 +586,21 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
                   <SelectValue placeholder="Priority" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="High" className="text-xs">
+                  <SelectItem value="Important & Urgent" className="text-xs">
                     <IconFlagFilled className="h-3 w-3 text-[#de5550]" />
-                    High
+                    Important & Urgent
                   </SelectItem>
-                  <SelectItem value="Medium" className="text-xs">
+                  <SelectItem value="Important & Not Urgent" className="text-xs">
                     <IconFlagFilled className="h-3 w-3 text-[#ffb110]" />
-                    Medium
+                    Important & Not Urgent
                   </SelectItem>
-                  <SelectItem value="Low" className="text-xs">
+                  <SelectItem value="Not Important & Urgent" className="text-xs">
                     <IconFlagFilled className="h-3 w-3 text-[#2383e2]" />
-                    Low
+                    Not Important & Urgent
+                  </SelectItem>
+                  <SelectItem value="Not Important & Not Urgent" className="text-xs">
+                    <IconFlagFilled className="h-3 w-3 text-muted-foreground" />
+                    Not Important & Not Urgent
                   </SelectItem>
                 </SelectContent>
               </Select>

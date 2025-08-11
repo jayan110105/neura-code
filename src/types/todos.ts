@@ -5,7 +5,12 @@ export interface Todo {
   title: string
   completed: boolean
   completedDate: Date | null
-  priority: 'High' | 'Medium' | 'Low' | null
+  priority:
+    | 'Important & Urgent'
+    | 'Important & Not Urgent'
+    | 'Not Important & Urgent'
+    | 'Not Important & Not Urgent'
+    | null
   dueDate: Date | null
   reminderTime: string | null
   category: Category

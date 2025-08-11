@@ -15,7 +15,12 @@ import {
 import { user } from './auth-schema'
 import { CATEGORY_VALUES } from '@/lib/categories'
 
-export const priorityEnum = pgEnum('priority', ['High', 'Medium', 'Low'])
+export const priorityEnum = pgEnum('priority', [
+  'Important & Urgent',
+  'Important & Not Urgent',
+  'Not Important & Urgent',
+  'Not Important & Not Urgent',
+])
 export const repeatEnum = pgEnum('repeat', [
   'Daily',
   'Weekly',

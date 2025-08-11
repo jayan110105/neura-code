@@ -53,12 +53,14 @@ export function CompletedTodosSection({ todos }: { todos: Todo[] }) {
 
   const getPriorityIconColor = (priority: string | null) => {
     switch (priority) {
-      case 'High':
+      case 'Important & Urgent':
         return 'text-[#de5550]'
-      case 'Medium':
+      case 'Important & Not Urgent':
         return 'text-[#ffb110]'
-      case 'Low':
+      case 'Not Important & Urgent':
         return 'text-[#2383e2]'
+      case 'Not Important & Not Urgent':
+        return 'text-muted-foreground'
       default:
         return 'text-muted-foreground'
     }
