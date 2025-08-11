@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    console.log(JSON.stringify(body, null, 2));
+    // console.log(JSON.stringify(body, null, 2));
 
     const message = body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
 
@@ -147,18 +147,18 @@ IMPORTANT - WhatsApp Formatting Rules:
 
     const toolDefinitions = getWhatsappTools(user.id);
 
-    const { toolCalls, text } = await generateText({
+    const { text } = await generateText({
       model: aiProvider === 'openai' ? openai(aiModelName) : google(aiModelName),
       messages,
       tools: toolDefinitions,
       stopWhen: stepCountIs(10),
     });
 
-    console.log('Tool calls:', JSON.stringify(toolCalls, null, 2));
+    // console.log('Tool calls:', JSON.stringify(toolCalls, null, 2));
 
     const replyMessage = text ?? 'I am not sure how to help with that.';
 
-    console.log('Reply to user:', replyMessage);
+    // console.log('Reply to user:', replyMessage);
 
     await storeMessage(user.id, replyMessage, 'assistant');
 

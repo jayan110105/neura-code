@@ -115,7 +115,7 @@ async function processReminders() {
       const repeatInfo = reminder.repeat !== 'None' ? ` (${reminder.repeat})` : '';
       const message = `🔔 *Reminder*${repeatInfo}\n\n${reminder.title}${reminder.description ? `\n\n${reminder.description}` : ''}\n\n_Originally scheduled for ${scheduledDateTime}_`;
 
-      console.log(`Attempting to send reminder: ${reminder.title} to ${reminder.user.phoneNumber}`);
+      // console.log(`Attempting to send reminder: ${reminder.title} to ${reminder.user.phoneNumber}`);
       
       await sendWhatsappMessage(reminder.user.phoneNumber, message);
       
@@ -124,7 +124,7 @@ async function processReminders() {
         .set({ lastSent: new Date() })
         .where(eq(reminders.id, reminder.id));
 
-      console.log(`Successfully sent reminder: ${reminder.title} to ${reminder.user.phoneNumber} (${reminder.repeat})`);
+      // console.log(`Successfully sent reminder: ${reminder.title} to ${reminder.user.phoneNumber} (${reminder.repeat})`);
       processedCount++;
     }
 
