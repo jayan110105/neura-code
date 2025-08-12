@@ -79,8 +79,6 @@ export async function POST(req: Request) {
           
           Today's date is ${todayFormatted} (long format: ${todayLongFormat}).
 
-          Begin with a concise checklist (3-7 bullets) of what you will do; keep items conceptual, not implementation-level.
-
           Toolbox:
           - createTodo: Add new tasks or plans as todo items (default for actionable items). You may set an optional due date and priority.
             * Priority (Eisenhower Matrix):
