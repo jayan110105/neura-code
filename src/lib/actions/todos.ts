@@ -101,10 +101,11 @@ export async function updateTodo(
   }
 
   // If completed status is being changed, update completedDate accordingly
-  const updateData: any = {
+  const updateData: Partial<typeof todos.$inferInsert> & { completedDate?: Date | null } = {
     title: formData.title,
     priority: formData.priority,
-    dueDate: formData.dueDate,
+    // Persist cleared date as NULL
+    dueDate: formData.dueDate ?? null,
     reminderTime: formData.reminderTime || null,
     category: formData.category,
   }

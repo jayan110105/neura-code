@@ -11,7 +11,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { IconCalendarFilled } from '@tabler/icons-react'
+import { IconCalendarFilled, IconX } from '@tabler/icons-react'
 import { cn } from '@/lib/utils'
 
 interface DatePickerProps {
@@ -22,6 +22,7 @@ interface DatePickerProps {
   showLabel?: boolean
   label?: string
   disablePastDates?: boolean
+  allowClear?: boolean
 }
 
 export function DatePicker({
@@ -32,6 +33,7 @@ export function DatePicker({
   showLabel = false,
   label = 'Date of birth',
   disablePastDates = false,
+  allowClear = true,
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false)
 
@@ -58,6 +60,27 @@ export function DatePicker({
               format(selectedDate, 'd MMM')
             ) : (
               <span>{placeholder}</span>
+            )}
+            {allowClear && selectedDate && (
+              <span
+                role="button"
+                tabIndex={0}
+                className="inline-flex items-center rounded hover:text-foreground focus:outline-none"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  onDateChange?.(undefined)
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    onDateChange?.(undefined)
+                  }
+                }}
+              >
+                <IconX className="h-3 w-3" />
+              </span>
             )}
           </Button>
         </PopoverTrigger>
