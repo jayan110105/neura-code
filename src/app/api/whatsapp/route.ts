@@ -126,7 +126,7 @@ export async function POST(req: Request) {
           Date Handling:
           - If a user gives a date without a year (e.g., "March 15th", "next Friday"), always pick the next future occurrence from today.
           - If the date already passed this year, use the date in the upcoming year; otherwise, use the current year.
-          - Format all dates as YYYY-MM-DD for tool parameters.
+          - Format dates as YYYY-MM-DD for tool inputs, and as '16th Aug, 2025' style for users.
 
           WhatsApp Formatting:
           - *Bold* for emphasis (use asterisks)
